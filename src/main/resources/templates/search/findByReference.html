@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Creative Youtuber</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <div th:replace="~{include/css :: css-merge}"></div>
+</head>
+<body>
+<div th:replace="~{include/preloader :: preloader}"></div>
+<div th:replace="~{include/navbar :: header}"></div>
+<main>
+    <div id='loading_layer'
+         style='position: fixed;z-index: 3000;top: 0;left: 0;width: 100%;height: 100%;display: none;justify-content: center;align-items: center;background-color: rgba(123, 123, 123, 0.4);writing-mode: vertical-lr;'>
+        <img style='width:30%' src='/resource/boots/hosting_tp/assets/img/logo/creative_youtuber.png'/></div>
+    <!-- Slider Area Start-->
+    <div class="slider-area slider-bg ">
+        <!-- Single Slider -->
+        <div class="single-slider d-flex align-items-center slider-height3" style="height: 300px">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-xl-6 col-lg-9 col-md-8 " style="margin-top: 130px">
+                        <div class="hero__caption hero__caption3 text-center">
+                            <h1 data-animation="fadeInLeft" data-delay=".6s " style="font-family: 'GmarketSansMedium', sans-serif;">대본에 맞는 참고자료 찾기</h1>
+                            <div id="errorMessage" style="display: none;" th:text="${error}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Slider Area End -->
+    <!--?  Form Area start  -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="d-none d-sm-block mb-5 pb-4">
+                <div class="col-lg-8" style="margin-left: 20rem">
+                    <form class="form-contact contact_form" method="post">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <textarea class="form-control w-100" id="content" name="message" cols="30" rows="9" onfocus="this.placeholder = ''" onblur="this.placeholder = '유튜브 대본을 넣어주세요'" placeholder="유튜브 대본을 넣어주세요"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mt-3" style="text-align: center">
+                            <button type="button" class="button button-contactForm boxed-btn" onclick="submitFormData()">자료찾기</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <div class="section-top-border">
+            <h1 class="mb-20 gj-text-align-center">Reference Videos</h1>
+            <div class="progress-table-wrap">
+                <div class="progress-table">
+                    <div class="table-head">
+                        <div class="serial">조회수</div>
+                        <div class="country">썸네일</div>
+                        <div class="visit">채널명</div>
+                        <div class="percentage">설명</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="serial">377244</div>
+                        <div class="country"><a href="https://www.youtube.com/watch?v=yzF_ZotgwUY&t=1s" target="_blank" style="display: contents"><div style="display: inline-block"><img src="https://i.ytimg.com/vi/yzF_ZotgwUY/default.jpg" alt="thumbnails" style="width:120px; height:68px; border-radius: .25rem;"></div><span style="color: black; padding-right: 10px">진짜 키워도 된다고?? 왈라비는 대체 얼마일까??</span></a></div>
+                        <div class="visit">다흑</div>
+                        <div class="percentage">물론 분양가격은 살벌합니다. #캥거루 #왈라비 #반려동물.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Area End -->
+</main>
+
+
+<div th:replace="~{include/footer :: footer}"></div>
+<div th:replace="~{include/js :: js-merge}"></div>
+<script>
+    async function submitFormData() {
+        const content = document.getElementById('content').value.trim();
+        if (!content) {
+            alert("유튜브 대본을 입력해주세요.");
+            return;
+        }
+        reloading_st();
+
+        const formData = new FormData();
+        formData.append('content', content);
+
+        try {
+            const response = await fetch('/core/youtubeReference', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.length === 0) {
+                alert("검색 결과가 없습니다.");
+                loading_ed();
+                return;
+            }
+            updateTable(data);
+        } catch (error) {
+            console.error('Error:', error);
+            alert("요청 처리 중 오류가 발생했습니다.");
+            loading_ed();
+        }
+    }
+
+    function updateTable(data) {
+        const table = document.querySelector('.progress-table');
+        const rowTemplate = document.querySelector('.table-row').cloneNode(true);  // 행 템플릿 복사
+
+        // 테이블 초기화
+        while (table.children.length > 1) {
+            table.removeChild(table.lastChild);
+        }
+
+        // 데이터로 테이블 채우기
+        data.forEach((item, index) => {
+            const row = rowTemplate.cloneNode(true);
+
+            row.querySelector('.serial').textContent = item.viewCount;
+            let thumbnailCell = row.querySelector('.country');
+            thumbnailCell.innerHTML = `<a href="${item.url}" target="_blank" style="display: contents;"><div style="display: inline-block"><img src="${item.thumbnailUrl}" alt="thumbnails" style="width:120px; height:68px; border-radius: .25rem;"></div><span style="color: black;">${item.title}</span></a>`;  // 썸네일 이미지에 스타일 추가
+            row.querySelector('.visit').textContent = item.channelTitle;
+            row.querySelector('.percentage').textContent = item.description;
+
+            table.appendChild(row);  // 테이블에 행 추가
+        });
+        loading_ed();
+    }
+
+    function loading_st() {
+        let layer_str = "<div id='loading_layer' style='position: fixed;z-index: 3000;top: 0;left: 0;width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;background-color: rgba(123 ,123 ,123 , 0.4);writing-mode: vertical-lr;'><img style='width:30%' src='/resource/boots/hosting_tp/assets/img/logo/creative_youtuber.png'></div>"
+        document.write(layer_str);
+    }
+
+    function loading_ed() {
+        let ta = document.getElementById('loading_layer');
+        ta.style.display = 'none';
+    }
+
+    function reloading_st() {
+        let re = document.getElementById('loading_layer');
+        re.style.display = 'flex';
+    }
+
+
+    window.onload = function() {
+        // Get the error message from the hidden div
+        var errorMessage = document.getElementById('errorMessage').textContent;
+        if (errorMessage) {
+        swal.fire(errorMessage);
+        }
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="header">
+    <!-- Header Start -->
+    <div class="header-area header-transparent" style="background-color: #55215c">
+        <div class="main-header ">
+            <div class="header-bottom  header-sticky">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <!-- Logo -->
+                        <div class="col-xl-2 col-lg-2">
+                            <div class="logo">
+                                <a th:href="@{/core/findByReference}"><img th:src="@{/resource/boots/hosting_tp/assets/img/logo/creative_youtuber.png}" style="width: 150px" height="85px" alt=""></a>
+                            </div>
+                        </div>
+                        <div class="col-xl-10 col-lg-10">
+                            <div class="menu-wrapper d-flex align-items-center justify-content-end">
+                                <!-- Main-menu -->
+                                <div class="main-menu d-none d-lg-block">
+                                    <nav>
+                                        <ul id="navigation" style="color: deeppink;">
+                                            <li><a th:href="@{/core/findByReference}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">참고자료 찾기</a></li>
+                                            <li><a th:href="@{/core/benchmarking}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">벤치마킹 영상찾기</a></li>
+                                            <li><a th:href="@{/caption/subtitle}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">유튜브 스크립트 추출</a></li>
+                                            <li><a th:href="@{/board/boardList}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">커뮤니티</a></li>
+                                            <li th:if="${session.SS_MEMBER_ID == null}"><a th:href="@{/login}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">로그인</a></li>
+                                            <li th:if="${session.SS_MEMBER_ID != null}"><a th:href="@{/logout}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">로그아웃</a></li>
+                                            <!-- Button -->
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- Mobile Menu -->
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+</html>

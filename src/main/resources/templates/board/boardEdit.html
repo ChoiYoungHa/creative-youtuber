@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>게시판 수정</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <div th:replace="~{include/css :: css-merge}"></div>
+</head>
+<body>
+<div th:replace="~{include/preloader :: preloader}"></div>
+<div th:replace="~{include/navbar :: header}"></div>
+
+<main>
+    <!-- Slider Area Start-->
+    <div id="errorMessage" style="display: none;" th:text="${error}"></div>
+    <div class="slider-area slider-bg ">
+        <!-- Single Slider -->
+        <div class="single-slider d-flex align-items-center slider-height3">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-xl-8 col-lg-9 col-md-12 ">
+                        <div class="hero__caption hero__caption3 text-center">
+                            <h1>게시물 수정</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Slider Shape -->
+        <div class="slider-shape d-none d-lg-block">
+            <img class="slider-shape1" src="/resource/boots/hosting_tp/assets/img/hero/top-left-shape.png" alt="">
+        </div>
+    </div>
+    <!-- Slider Area End -->
+    <!--? Blog Area Start -->
+    <section class="blog_area single-post-area section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 posts-list">
+                    <div class="single-post">
+                        <div class="blog_details">
+                            <div class="blog-author">
+                                <form th:action="@{/board/boardEditUpdate/{boardId}(boardId=${boardDetail.board_id})}" th:method="post" onsubmit="return doSubmit(this);">
+                                    <div class="quote-wrapper">
+                                        <div>
+                                            <div class="row col-lg-12"><input class="single-input font-weight-bold" id="title" name="title" type="text" th:value="${boardDetail.board_title}"></div>
+                                            <div class="row col-2">
+                                            </div>
+                                            <div class="row justify-content-end">
+                                                <div><h5 class="mr-20" id="click" name="click" th:text="'조회수 : ' + ${boardDetail.click}">조회수</h5></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row col-lg-12">
+                                        <textarea class="single-input-primary" id="content" name="content" th:text="${boardDetail.board_content}"></textarea>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div><input class="genric-btn info-border radius mr-10 ml-20" type="submit" value="수정" /></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Blog Area End -->
+</main>
+<script>
+
+    function doSubmit() {
+        const title = document.getElementById('title').value;
+        const contents = document.getElementById('content').value;
+
+        // 모든 필드가 채워졌는지 검사
+        if (title === '' || contents === '') {
+            Swal.fire('모든 필드를 채워주세요.');
+            return false;
+        }
+        return true;
+    }
+
+    window.onload = function() {
+        // Get the error message from the hidden div
+        var errorMessage = document.getElementById('errorMessage').textContent;
+        if (errorMessage) {
+            swal.fire(errorMessage);
+        }
+    };
+
+</script>
+<div th:replace="~{include/footer :: footer}"></div>
+<div th:replace="~{include/js :: js-merge}"></div>
+
+</body>
+</html>

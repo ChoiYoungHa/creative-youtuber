@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Creative Youtuber</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <div th:replace="~{include/css :: css-merge}"></div>
+</head>
+<body>
+<div th:replace="~{include/preloader :: preloader}"></div>
+<div th:replace="~{include/navbar :: header}"></div>
+
+<main>
+    <div id='loading_layer'
+         style='position: fixed;z-index: 3000;top: 0;left: 0;width: 100%;height: 100%;display: none;justify-content: center;align-items: center;background-color: rgba(123, 123, 123, 0.4);writing-mode: vertical-lr;'>
+        <img style='width:30%' src='/resource/boots/hosting_tp/assets/img/logo/creative_youtuber.png'/></div>
+    <!-- Slider Area Start-->
+    <div class="slider-area slider-bg ">
+        <!-- Single Slider -->
+        <div class="single-slider d-flex align-items-center slider-height3" style="height: 300px">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-xl-5 col-lg-9 col-md-8 " style="margin-top: 130px">
+                        <div class="hero__caption hero__caption3 text-center">
+                            <h1 data-animation="fadeInLeft" data-delay=".6s" style="font-family: 'GmarketSansMedium', sans-serif;">유튜브 스크립트 추출</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Slider Area End -->
+    <!--?  Form Area start  -->
+    <section class="contact-section" style="padding-top: 100px; padding-bottom: 1rem">
+        <div class="container">
+            <div class="col-lg-8" style="margin-left: 20rem">
+                <form class="form-contact contact_form" action="contact_process.php" method="post" id="contactForm" novalidate="novalidate">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <input class="form-control" name="youtube_url" id="youtube_url" type="text" onblur="this.placeholder = '유튜브 URL을 입력해주세요'" placeholder="유튜브 URL을 입력해주세요">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mt-3" style="text-align: center">
+                        <button type="submit" class="button button-contactForm boxed-btn" onclick="requestScript()">스크립트 추출</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div>
+            <h1 class="gj-text-align-center" style="margin-top: 50px; font-weight: bold">유튜브 스크립트 추출결과</h1>
+        </div>
+    </section>
+    <section class="blog_area single-post-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 posts-list">
+                    <div class="single-post">
+                        <div class="blog_details" style="padding-top: 1rem;">
+                            <div class="blog-author">
+                                <div class="quote-wrapper" style="text-align: center; color: black; font-style: normal; font-family: 'GmarketSansMedium', sans-serif">
+                                    <div>
+                                       <div id="scriptResult">추출결과</div>
+                                    </div>
+                                </div>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section-top-border"></div>
+    </section>
+
+    <!-- Contact Area End -->
+</main>
+
+
+
+<div th:replace="~{include/footer :: footer}"></div>
+<div th:replace="~{include/js :: js-merge}"></div>
+<script>
+
+    async function requestScript() {
+        const youtube_url = document.getElementById('youtube_url').value.trim();
+        // 유튜브 URL 유효성 검사
+        const youtubeUrlPattern = /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/;
+        if (!youtube_url) {
+            alert("URL을 입력해주세요.");
+            return;
+        } else if (!youtubeUrlPattern.test(youtube_url)) {
+            alert("유효한 유튜브 URL을 입력해주세요.");
+            return;
+        }
+
+        reloading_st();
+
+        const formData = new FormData();
+        formData.append('youtubeUrl', youtube_url);
+
+        try {
+            const response = await fetch('/caption/getCaption', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.length === 0) {
+                alert("검색 결과가 없습니다.");
+                loading_ed();
+                return;
+            }
+            updateContent(data);
+        } catch (error) {
+            console.error('Error:', error);
+            alert("요청 처리 중 오류가 발생했습니다.");
+            loading_ed();
+        }
+    }
+
+    function updateContent(data) {
+        const resultElement = document.getElementById('scriptResult'); // 결과를 표시할 요소 선택
+        resultElement.innerHTML = ''; // 기존 내용을 비웁니다.
+
+        // 데이터 항목을 줄바꿈으로 연결하여 하나의 문자열로 변환
+        const formattedText = data.join('\n'); // 줄바꿈으로 각 항목을 연결
+
+        // 생성된 텍스트를 결과 요소의 텍스트로 설정
+        resultElement.textContent = formattedText;
+
+        // 스타일을 추가로 정의하여 들여쓰기 적용
+        resultElement.style.textIndent = '2em'; // 들여쓰기를 2em으로 설정
+        resultElement.style.whiteSpace = 'pre-wrap'; // 텍스트가 자연스럽게 줄바꿈되도록 설정
+        loading_ed();
+    }
+
+
+    function loading_st() {
+        let layer_str = "<div id='loading_layer' style='position: fixed;z-index: 3000;top: 0;left: 0;width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;background-color: rgba(123 ,123 ,123 , 0.4);writing-mode: vertical-lr;'><img style='width:30%' src='/resource/boots/hosting_tp/assets/img/logo/creative_youtuber.png'></div>"
+        document.write(layer_str);
+    }
+
+    function loading_ed() {
+        let ta = document.getElementById('loading_layer');
+        ta.style.display = 'none';
+    }
+
+    function reloading_st() {
+        let re = document.getElementById('loading_layer');
+        re.style.display = 'flex';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+/* src/main/resources/static/css/style.css */
+@font-face {
+    font-family: 'GmarketSansMedium';
+    src: url('/resource/boots/font/GmarketSansMedium.otf') format('truetype');
+}
+
+body {
+    font-family: 'GmarketSansMedium', sans-serif;
+}

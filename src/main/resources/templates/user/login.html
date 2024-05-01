@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Login</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <div th:replace="~{include/css :: css-merge}"></div>
+</head>
+<body>
+<div th:replace="~{include/preloader :: preloader}"></div>
+<div th:replace="~{include/navbar :: header}"></div>
+<main class="login-body">
+    <!-- Login Admin -->
+    <div id="errorMessage" style="display: none;" th:text="${error}"></div>
+    <form class="form-default" action="/getLogin" method="POST" onsubmit="return loginChk()">
+        <div class="login-form">
+            <h2>로그인</h2>
+            <div class="form-input">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" placeholder="Email"/>
+            </div>
+            <div class="form-input">
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" placeholder="Password">
+            </div>
+
+            <div class="form-input pt-30">
+                <input type="submit" name="submit" value="login">
+            </div>
+            <!-- Forget Password -->
+            <a href="/signup" class="registration">회원가입</a>
+        </div>
+    </form>
+    <!-- /end login form -->
+</main>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        if (success) {
+            Swal.fire({
+                title: '성공!',
+                text: '회원가입이 성공적으로 완료되었습니다.',
+                icon: 'success',
+                confirmButtonText: '확인'
+            });
+        }
+    });
+
+    function loginChk() {
+        const email = document.getElementById("email").value;
+        const expEmail = /^[A-Za-z0-9_.-]+@[A-Za-z0-9-]+\.[A-Za-z0-9-]+$/;
+        if (!expEmail.test(email)) {
+            console.log("유효하지 않은 이메일 형식");
+            Swal.fire('유효한 이메일 주소를 입력해주세요.');
+            return false; // 폼 제출 방지
+        }
+
+        return true; // 폼 제출 허용
+    }
+    window.onload = function() {
+        // Get the error message from the hidden div
+        var errorMessage = document.getElementById('errorMessage').textContent;
+        if (errorMessage) {
+            swal.fire(errorMessage);
+        }
+    };
+
+</script>
+
+<div th:replace="~{include/footer :: footer}"></div>
+<div th:replace="~{include/js :: js-merge}"></div>
+</body>
+</html>

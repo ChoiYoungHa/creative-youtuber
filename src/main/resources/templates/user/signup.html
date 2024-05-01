@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Sign Up</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <div th:replace="~{include/css :: css-merge}"></div>
+</head>
+<body>
+<div th:replace="~{include/preloader :: preloader}"></div>
+<div th:replace="~{include/navbar :: header}"></div>
+
+<main class="login-body">
+    <!-- Login Admin -->
+    <form class="form-default" action="/joinMember" method="POST" onsubmit="return signupCheck()">
+        <div class="login-form" style="margin-top: 5rem">
+            <!-- logo-login -->
+
+            <h2>회원가입</h2>
+
+            <div class="form-input">
+                <label for="member_name">이름</label>
+                <input id="member_name" type="text" name="member_name" placeholder="Full name">
+            </div>
+            <div class="form-input">
+                <label for="member_nick">닉네임</label>
+                <input id="member_nick" type="text" name="member_nick" placeholder="Full name">
+            </div>
+            <div class="form-input">
+                <label for="email">이메일</label>
+                <input id="email" type="email" name="email" placeholder="Email Address">
+            </div>
+            <div class="form-input">
+                <label for="password_1">비밀번호</label>
+                <input id="password_1" type="password" name="password" placeholder="Password">
+            </div>
+            <div class="form-input">
+                <label for="password_2">비밀번호 확인</label>
+                <input id="password_2" type="password" name="password" placeholder="Confirm Password">
+            </div>
+            <div th:if="${error}" th:text="${error}" style="color: red;"></div>
+            <div class="form-input pt-30">
+                <input type="submit" name="submit" value="Registration">
+            </div>
+        </div>
+    </form>
+    <!-- /end login form -->
+</main>
+<script>
+    function emailCheck() {
+        const email = document.getElementById('email').value;
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+        if (!emailRegex.test(email)) {
+            alert('유효하지 않은 이메일 주소입니다. 올바른 이메일 주소를 입력해주세요.');
+            return false;
+        }
+        return true;
+    }
+
+    function signupCheck() {
+        const memberName = document.getElementById('member_name').value;
+        const memberNick = document.getElementById('member_nick').value;
+        const email = document.getElementById('email').value;
+        const password1 = document.getElementById('password_1').value;
+        const password2 = document.getElementById('password_2').value;
+
+        // 모든 필드가 채워졌는지 검사
+        if (memberName === '' || memberNick === '' || email === '' || password1 === '' || password2 === '') {
+            Swal.fire('모든 필드를 채워주세요.');
+            return false;
+        }
+
+        // 비밀번호와 비밀번호 확인이 일치하는지 검사
+        if (password1 !== password2) {
+            Swal.fire('입력하신 비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
+            return false;
+        }
+
+        // 이메일 형식 검증
+        return emailCheck();  // 이메일 형식이 유효한지 추가로 검사
+    }
+
+</script>
+<div th:replace="~{include/footer :: footer}"></div>
+<div th:replace="~{include/js :: js-merge}"></div>
+</body>
+</html>

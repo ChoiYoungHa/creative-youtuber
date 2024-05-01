@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>게시물</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <div th:replace="~{include/css :: css-merge}"></div>
+</head>
+<body>
+<div th:replace="~{include/preloader :: preloader}"></div>
+<div th:replace="~{include/navbar :: header}"></div>
+<main>
+    <!-- Slider Area Start-->
+    <div id="errorMessage" style="display: none;" th:text="${error}"></div>
+    <div class="slider-area slider-bg ">
+        <!-- Single Slider -->
+        <div class="single-slider d-flex align-items-center slider-height3">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-xl-8 col-lg-9 col-md-12 ">
+                        <div class="hero__caption hero__caption3 text-center">
+                            <h1>게시물 조회</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Slider Shape -->
+        <div class="slider-shape d-none d-lg-block">
+            <img class="slider-shape1" src="/resource/boots/hosting_tp/assets/img/hero/top-left-shape.png" alt="">
+        </div>
+    </div>
+    <!-- Slider Area End -->
+    <!--? Blog Area Start -->
+    <section class="blog_area single-post-area section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 posts-list">
+                    <div class="single-post">
+                        <div class="blog_details">
+                            <div class="blog-author">
+                                <div class="quote-wrapper">
+                                    <div>
+                                        <div><h1 class="font-weight-bold" id="board_title" th:text="${boardDetail.board_title}">제목들어가야함</h1></div>
+                                        <div><h4 id="member_nickname" th:text="${boardDetail.member_nickname}">작성자 닉네임 </h4></div>
+                                        <div class="row justify-content-end">
+                                            <div><h5 class="mr-20" id="board_click" th:text="'조회수 : ' + ${boardDetail.click}">조회수 : </h5></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="media align-items-center">
+                                    <div id="board_content" th:text="${boardDetail.board_content}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 16px">내용 드가야함</div>
+                                </div>
+                                <div class="comments-area">
+                                    <h4 class="font-weight-bold">댓글목록</h4>
+                                    <div class="comment-list" id="comment_list">
+
+                                    </div>
+                                    <div class="comment-form">
+                                        <h4 class="font-weight-bold">댓글작성</h4>
+                                        <form>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="form-group">
+                                                        <textarea class="form-control w-100" id="commentContent" cols="30" rows="9"
+                                                                  placeholder="Write Comment"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <button type="button" id="createCommentBtn" class="button button-contactForm btn_1 boxed-btn" onclick="submitComment()">댓글입력</button>
+                                                <button type="button" id="editComment" style="display: none" class="button button-contactForm btn_1 boxed-btn" onclick="editCommentFn()">댓글수정</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="comments-area">
+                                    <div class="comment-list">
+                                        <a th:if="${session?.SS_MEMBER_ID != null and session.SS_MEMBER_ID == boardDetail.member_id}" class="genric-btn primary-border"
+                                           th:href="@{/board/boardEdit/{boardId} (boardId=${boardDetail.board_id})}">수정</a>
+                                        <a th:if="${session?.SS_MEMBER_ID != null and session.SS_MEMBER_ID == boardDetail.member_id}" class="genric-btn primary-border"
+                                           th:href="@{/board/boardDelete/{boardId} (boardId=${boardDetail.board_id})}">삭제</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Blog Area End -->
+</main>
+<script th:inline="javascript">
+    window.onload = async function() {
+        // Get the error message from the hidden div
+        var errorMessage = document.getElementById('errorMessage').textContent;
+        if (errorMessage) {
+            swal.fire(errorMessage);
+        }
+
+        // 게시판 상세 조회 시 댓글 목록 자동 로드
+        try {
+            await getComment();  // 댓글 목록을 가져오는 함수 호출
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            Swal.fire('댓글을 불러오는데 실패했습니다.', error.message, 'error');
+        }
+    };
+
+
+
+    /* 댓글 등록 요청 */
+    async function submitComment() {
+        console.log("click?")
+        const commentContent = document.getElementById('commentContent').value;
+        const boardId = /*[[${boardDetail.board_id}]]*/ 'boardId';
+        const memberId = /*[[${session.SS_MEMBER_ID}]]*/ 'memberId';
+
+        if (commentContent.trim() === '') {
+            Swal.fire('댓글을 작성해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch("/comment/createComment", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    comment_content: commentContent,
+                    board_id: boardId,
+                    member_id: memberId
+                })
+            });
+
+            const message = await response.text(); // 응답 본문 추출
+
+            if (!response.ok) {
+                throw new Error(message || '댓글 등록에 실패했습니다.');
+            }
+            Swal.fire('성공', message, 'success');
+            // 댓글 목록 새로고침
+            await getComment();
+            document.getElementById('commentContent').value = ''; // 입력 필드 초기화
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire(error.message, 'error');
+        }
+    }
+
+    /* 댓글불러오기 */
+    async function getComment() {
+        const boardId = /*[[${boardDetail.board_id}]]*/ 'boardId';
+        const currentUserId = /*[[${session.SS_MEMBER_ID}]]*/ 'currentUserId';  // 세션에서 현재 사용자 ID 가져오기
+        try {
+            const response = await fetch(`/comment/getComments/${boardId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            }
+
+            const comments = await response.json();
+            let commentHtml = '';
+            comments.forEach(comment => {
+                commentHtml += `<div class="single-comment justify-content-between d-flex mt-20" id="comment-${comment.comment_id}">
+                                    <div class="user justify-content-between d-flex">
+                                        <div class="desc">
+                                            <hr>
+                                            <p class="comment" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 16px">${comment.comment_content}</p>
+                                            <h5>${comment.member_nickname}</h5>
+                                            <div class="d-flex justify-content-between">`;
+
+
+                // 현재 로그인한 사용자와 댓글 작성자가 같을 경우에만 수정, 삭제 버튼 표시
+                if (currentUserId === comment.member_id) {
+                    commentHtml += `<button onclick="editComment(${comment.comment_id})" class="button button-contactForm btn_1 boxed-btn mt-3">수정</button>
+                                    <button onclick="deleteComment(${comment.comment_id})" class="button button-contactForm btn_1 boxed-btn mt-3">삭제</button>`;
+                }
+
+                commentHtml += `       </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+            });
+            document.getElementById('comment_list').innerHTML = commentHtml;
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('댓글을 불러오는데 실패했습니다.');
+        }
+    }
+
+    // 수정할 댓글 form으로 옮기기
+    async function editComment(commentId) {
+        try {
+            const commentElement = document.getElementById(`comment-${commentId}`);
+            const commentText = commentElement.querySelector('.comment').textContent;
+
+            // 댓글 내용을 수정 필드에 설정
+            const commentInput = document.getElementById('commentContent');
+            commentInput.value = commentText;
+
+            document.getElementById("createCommentBtn").style.display = "none";
+            const editBtn = document.getElementById("editComment");
+            editBtn.style.display = "block";
+            editBtn.value = commentId;
+
+            // 입력 필드에 포커스 설정
+            commentInput.focus();
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('댓글 수정을 준비하는데 문제가 발생했습니다.');
+        }
+    }
+
+    // 댓글 id, content 서버로 수정 요청하기
+    async function editCommentFn() {
+        let commentId = document.getElementById('editComment').value;
+        let commentContent = document.getElementById('commentContent').value;
+
+        console.log(commentContent);
+
+
+        if (!commentContent.trim()) {
+            Swal.fire('댓글 내용을 입력해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/comment/editComment/${commentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({comment_content: commentContent })
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            Swal.fire('성공', '댓글이 수정되었습니다.', 'success');
+            await getComment();  // 댓글 목록을 새로고침
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire(error.message, 'error');
+        }
+    }
+
+    async function deleteComment(commentId){
+        try {
+            const response = await fetch(`/comment/deleteComment/${commentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            Swal.fire('성공', '댓글이 삭제되었습니다.', 'success');
+            await getComment();  // 댓글 목록을 새로고침
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire(error.message, 'error');
+        }
+    }
+
+
+
+</script>
+
+<div th:replace="~{include/footer :: footer}"></div>
+<div th:replace="~{include/js :: js-merge}"></div>
+</body>
+</html>
