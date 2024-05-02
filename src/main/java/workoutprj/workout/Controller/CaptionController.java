@@ -24,19 +24,14 @@ public class CaptionController {
 
     @PostMapping("/getCaption")
     @ResponseBody
-    public ResponseEntity<String> getCaption(HttpServletRequest request) {
+    public String getCaption(HttpServletRequest request) {
         String youtubeUrl = request.getParameter("youtubeUrl");
 
         String videoId = youtubeUrl.split("v=")[1].trim();
 
         logger.info("videoId: " + videoId);
-        return captionService.getCaption(videoId).
-                onErrorMap(ex -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error fetching caption"))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Caption not found"))
-                .block();
+        return captionService.getCaption(videoId).block();
     }
-
     @GetMapping("/subtitle")
     public String youtubeScript() {
         return "search/subtitle";
