@@ -24,11 +24,11 @@ public class MemberController {
     private final MemberService memberService;
 
     // 인덱스 페이지 생성
-    @GetMapping("/")
-    public String index(){
-        log.info("index 페이지 연결");
-        return "search/findByReference";
-    }
+//    @GetMapping("/")
+//    public String index(){
+//        log.info("index 페이지 연결");
+//        return "search/findByReference";
+//    }
 
     // 로그인 페이지 이동
     @RequestMapping("/login")
