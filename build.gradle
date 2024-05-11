@@ -25,9 +25,15 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-devtools'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.boot:spring-boot-starter-reactor-netty:3.2.5'
+
+	implementation 'org.springframework.boot:spring-boot-devtools'
+
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
 
 	// Querydsl 추가
@@ -47,9 +53,11 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	testImplementation("org.junit.vintage:junit-vintage-engine") {
-		exclude group: "org.hamcrest", module: "hamcrest-core"
-	}
 	runtimeOnly 'com.h2database:h2'
+
+	test {
+		useJUnitPlatform()
+	}
+
 
 }

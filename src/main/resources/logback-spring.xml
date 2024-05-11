@@ -11,4 +11,16 @@
         <appender-ref ref="Console" />
     </root>
 
+    <!-- Spring Framework 로그 설정 -->
+    <logger name="org.springframework" level="INFO" additivity="true">
+        <appender-ref ref="Console" />
+    </logger>
+
+    <!-- AOP와 Controller가 있는 패키지 로그 설정 -->
+    <logger name="workoutprj.workout" level="INFO" additivity="true">
+        <appender-ref ref="Console" />
+    </logger>
+
+
+
 </configuration>

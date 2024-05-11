@@ -17,16 +17,27 @@ spring:
   servlet:
     mime-mappings:
       otf: "font/otf"
+  kafka:
+    producer:
+      bootstrap-servers: 3.35.159.167:10000,3.35.159.167:10001,3.35.159.167:10002
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 logging:
   level:
+    root: INFO
+    workoutprj.workout: INFO
     org:
+      springframework: INFO
       hibernate:
         SQL: DEBUG
         type:
           descriptor:
             sql:
               BasicBinder: TRACE
+
+
+
 
 openai:
   api:

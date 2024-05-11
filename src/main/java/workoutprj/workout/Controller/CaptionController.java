@@ -32,9 +32,15 @@ public class CaptionController {
         logger.info("videoId: " + videoId);
         return captionService.getCaption(videoId).block();
     }
+
     @GetMapping("/subtitle")
     public String youtubeScript() {
         return "search/subtitle";
     }
 
+    @GetMapping("/test")
+    @ResponseBody
+    public ResponseEntity<String> test(){
+        return ResponseEntity.ok("Test endpoint");
+    }
 }
