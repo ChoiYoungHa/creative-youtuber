@@ -54,45 +54,45 @@ public class MonitoringAspect {
     public void databaseTransactionMethod(){}
 
 
-//    // 네트워크 요청 처리 전 로그 기록
-//    @Before("networkRequestMethods()")
-//    public void beforeMethodCall(JoinPoint joinPoint) {
-//        HttpServletRequest request = ((ServletRequestAttributes)
-//                RequestContextHolder.currentRequestAttributes()).getRequest();
-//        Map<String, Object> logMap = new HashMap<>();
-//        logMap.put("event", "request_received");
-//        logMap.put("method", request.getMethod());
-//        logMap.put("uri", request.getRequestURI());
-//        logMap.put("remoteAddr", request.getRemoteAddr());
-//        logMap.put("timestamp", Instant.now());
-//        sendLog(toJson(logMap));
-//    }
-//
-//    // 요청 처리 후 성공적 완료 로그
-//    @AfterReturning(pointcut = "networkRequestMethods()", returning = "result")
-//    public void afterReturningMethodCall(JoinPoint joinPoint, Object result) {
-//        Map<String, Object> logMap = new HashMap<>();
-//        logMap.put("event", "request_completed");
-//        logMap.put("signature", joinPoint.getSignature().getName());
-//        if (result instanceof ResponseEntity) {
-//            ResponseEntity<?> response = (ResponseEntity<?>) result;
-//            logMap.put("status", response.getStatusCode().value());
-//            logMap.put("responseBody", response.getBody());
-//        }
-//        logMap.put("timestamp", Instant.now());
-//        sendLog(toJson(logMap));
-//    }
-//
-//    // 예외 발생 시 로그 기록
-//    @AfterThrowing(pointcut = "networkRequestMethods()", throwing = "ex")
-//    public void afterThrowingMethodCall(JoinPoint joinPoint, Throwable ex) {
-//        Map<String, Object> logMap = new HashMap<>();
-//        logMap.put("event", "request_error");
-//        logMap.put("signature", joinPoint.getSignature().getName());
-//        logMap.put("error", ex.getMessage());
-//        logMap.put("timestamp", Instant.now());
-//        sendLog(toJson(logMap));
-//    }
+    // 네트워크 요청 처리 전 로그 기록
+    @Before("networkRequestMethods()")
+    public void beforeMethodCall(JoinPoint joinPoint) {
+        HttpServletRequest request = ((ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes()).getRequest();
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("event", "request_received");
+        logMap.put("method", request.getMethod());
+        logMap.put("uri", request.getRequestURI());
+        logMap.put("remoteAddr", request.getRemoteAddr());
+        logMap.put("timestamp", Instant.now());
+    //    sendLog(toJson(logMap));
+    }
+
+    // 요청 처리 후 성공적 완료 로그
+    @AfterReturning(pointcut = "networkRequestMethods()", returning = "result")
+    public void afterReturningMethodCall(JoinPoint joinPoint, Object result) {
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("event", "request_completed");
+        logMap.put("signature", joinPoint.getSignature().getName());
+        if (result instanceof ResponseEntity) {
+            ResponseEntity<?> response = (ResponseEntity<?>) result;
+            logMap.put("status", response.getStatusCode().value());
+            logMap.put("responseBody", response.getBody());
+        }
+        logMap.put("timestamp", Instant.now());
+    //    sendLog(toJson(logMap));
+    }
+
+    // 예외 발생 시 로그 기록
+    @AfterThrowing(pointcut = "networkRequestMethods()", throwing = "ex")
+    public void afterThrowingMethodCall(JoinPoint joinPoint, Throwable ex) {
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("event", "request_error");
+        logMap.put("signature", joinPoint.getSignature().getName());
+        logMap.put("error", ex.getMessage());
+        logMap.put("timestamp", Instant.now());
+    //    sendLog(toJson(logMap));
+    }
 
     // DB 트랜잭션 시작 전 로그 기록
     @Before("databaseTransactionMethod()")
@@ -103,7 +103,7 @@ public class MonitoringAspect {
         logMap.put("arguments", Arrays.toString(joinPoint.getArgs()));
         logMap.put("timestamp", Instant.now());
 
-        sendLog(toJson(logMap));
+    //    sendLog(toJson(logMap));
     }
 
     // DB 트랜잭션 완료 후 로그 기록
@@ -114,8 +114,7 @@ public class MonitoringAspect {
         logMap.put("signature", joinPoint.getSignature().toShortString());
         logMap.put("result", result);
         logMap.put("timestamp", Instant.now());
-
-        sendLog(toJson(logMap));
+    //    sendLog(toJson(logMap));
     }
 
     // DB 트랜잭션 예외 시 로그 기록
@@ -127,19 +126,19 @@ public class MonitoringAspect {
         logMap.put("error", ex.getMessage());
         logMap.put("timestamp", Instant.now());
 
-        sendLog(toJson(logMap));
+    //    sendLog(toJson(logMap));
     }
 
-    private void sendLog(String message) {
-        webClient.post()
-                .uri("/log")
-                .body(Mono.just(message), String.class)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .onErrorResume(e -> {
-                    log.error("fail to send log to server, saving locally", e);
-                    return Mono.empty();
-                })
-                .subscribe();
-    }
+//    private void sendLog(String message) {
+//        webClient.post()
+//                .uri("/log")
+//                .body(Mono.just(message), String.class)
+//                .retrieve()
+//                .bodyToMono(Void.class)
+//                .onErrorResume(e -> {
+//                    log.error("fail to send log to server, saving locally", e);
+//                    return Mono.empty();
+//                })
+//                .subscribe();
+//    }
 }

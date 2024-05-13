@@ -14,6 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,16 +70,19 @@ public class MonitoringInterceptor implements HandlerInterceptor {
         long endTime = System.currentTimeMillis();
         long executeTime = endTime - startTime;
 
-        Map<String, Object> pMap = new HashMap<>();
-        pMap.put("http_method", request.getMethod());
-        pMap.put("http_uri", request.getRequestURI());
-        pMap.put("http_start_time", startTime);
-        pMap.put("http_end_time", endTime);
-        pMap.put("http_execute_time", executeTime + "ms");
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("@timestamp", Instant.now().toString());
+        logMap.put("method", request.getMethod());
+        logMap.put("uri", request.getRequestURI());
+        logMap.put("status_code", response.getStatus());
+        logMap.put("response_time_ms", executeTime);
+        logMap.put("remote_address", request.getRemoteAddr());
+        logMap.put("user_agent", request.getHeader("User-Agent"));
+        logMap.put("error_message", ex != null ? ex.getMessage() : null);
 
         // 로그 포맷 통일
         String logMessage = String.format("[%s] %s executed in %dms", request.getMethod(), request.getRequestURI(), executeTime);
-        sendLog(toJson(pMap));
+        sendLog(toJson(logMap));
         log.info(logMessage);
 
         // 예외 발생 시 로깅
