@@ -100,6 +100,7 @@ public class MonitoringInterceptor implements HandlerInterceptor {
                 .bodyToMono(Void.class)
                 .onErrorResume(e -> {
                     log.error("Failed to send log to server, error: {}", e.getMessage());
+                    log.info("error");
                     return Mono.empty();
                 })
                 .subscribe();
