@@ -19,19 +19,14 @@ import workoutprj.workout.Service.Impl.MemberService;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class MemberController {
 
     private final MemberService memberService;
 
-    // 인덱스 페이지 생성
-    @GetMapping("/")
-    public String index(){
-        log.info("index 페이지 연결");
-        return "search/findByReference";
-    }
 
     // 로그인 페이지 이동
-    @RequestMapping("/login")
+    @GetMapping("/login")
     public String login(HttpSession session, Model model) {
 
         if (session.getAttribute("SS_MEMBER_ID") != null) {
@@ -40,8 +35,9 @@ public class MemberController {
         }
         return "user/login";
     }
+
     // 로그인
-    @PostMapping("/getLogin")
+    @PostMapping("/login")
     public String getLogin(HttpServletRequest request, Model model, HttpSession session) {
         log.info("getLogin Start!");
         String email = request.getParameter("email");

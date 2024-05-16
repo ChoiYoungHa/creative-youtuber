@@ -14,7 +14,7 @@
 <main class="login-body">
     <!-- Login Admin -->
     <div id="errorMessage" style="display: none;" th:text="${error}"></div>
-    <form class="form-default" action="/getLogin" method="POST" onsubmit="return loginChk()">
+    <form class="form-default" action="/auth/login" method="POST" onsubmit="return loginChk()">
         <div class="login-form">
             <h2>로그인</h2>
             <div class="form-input">
