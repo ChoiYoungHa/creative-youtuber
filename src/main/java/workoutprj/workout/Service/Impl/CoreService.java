@@ -432,6 +432,7 @@ public class CoreService implements ICoreService {
         List<YoutubeDTO> benchmarking = parseYoutubeSearchResult(result, highPerformingVideos);
 
 
+
         return benchmarking;
     }
 

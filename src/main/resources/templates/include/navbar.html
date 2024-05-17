@@ -23,7 +23,7 @@
                                             <li><a th:href="@{/caption/subtitle}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">유튜브 스크립트 추출</a></li>
                                             <li><a th:href="@{/board/boardList}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">커뮤니티</a></li>
                                             <li th:if="${session.SS_MEMBER_ID == null}"><a th:href="@{/auth/login}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">로그인</a></li>
-                                            <li th:if="${session.SS_MEMBER_ID != null}"><a th:href="@{/logout}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">로그아웃</a></li>
+                                            <li th:if="${session.SS_MEMBER_ID != null}"><a th:href="@{/auth/logout}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 14px">로그아웃</a></li>
                                             <!-- Button -->
                                         </ul>
                                     </nav>

@@ -58,7 +58,7 @@ public class MemberController {
         }
     }
 
-    // 로그아웃 기능
+    // 로그아웃
     @GetMapping("/logout")
     public String logout(HttpSession session){
         session.removeAttribute("SS_MEMBER_ID");
@@ -74,7 +74,7 @@ public class MemberController {
     }
 
     // 회원가입
-    @PostMapping("/joinMember")
+    @PostMapping("/signup")
     public String joinMember(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
         String memberName = request.getParameter("member_name");
         String memberNick = request.getParameter("member_nick");
