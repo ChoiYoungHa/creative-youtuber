@@ -3,14 +3,13 @@ pipeline {
 
     environment {
         AWS_REGION = 'ap-northeast-2'
-        SECRET_NAME = 'youtuber_prod_app' // Secrets Manager에서 저장된 비밀의 이름
+        SECRET_NAME = 'youtuber_prod_app'
     }
 
     stages {
         stage('Setup AWS CLI') {
             steps {
                 script {
-                    // AWS CLI가 설치되어 있는지 확인하고 설치되지 않았다면 설치합니다.
                     if (sh(script: 'which aws', returnStatus: true) != 0) {
                         sh 'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"'
                         sh 'unzip awscliv2.zip'
@@ -20,28 +19,11 @@ pipeline {
             }
         }
 
-        stage('Debug AWS Credentials') {
-            steps {
-                script {
-                    // 환경 변수가 올바르게 설정되었는지 확인합니다.
-                    sh 'aws configure list'
-                }
-            }
-        }
-
         stage('Fetch Secrets') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials-id'
-                ]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                 credentialsId: 'aws-credentials-id']]) {
                     script {
-                        // AWS CLI를 사용하여 AWS 환경 변수를 설정합니다.
-                        sh """
-                            export AWS_REGION=${AWS_REGION}
-                        """
-
-                        // AWS Secrets Manager에서 비밀을 가져와 환경 변수로 설정합니다.
                         def secretJson = sh(
                             script: """
                                 aws secretsmanager get-secret-value --region ${AWS_REGION} --secret-id ${SECRET_NAME} --query SecretString --output text
@@ -51,7 +33,6 @@ pipeline {
 
                         def secretMap = readJSON text: secretJson
 
-                        // 가져온 비밀을 환경 변수로 설정합니다.
                         env.mysql_rds_pw = secretMap.mysql_rds_pw
                         env.openai_api_key = secretMap.openai_api_key
                         env.youtube_api_key = secretMap.youtube_api_key
@@ -65,13 +46,41 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './gradlew build'
+                sh './gradlew clean build'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                # 기존 컨테이너 중지 및 삭제
+                docker ps -a -q --filter "name=spring-boot-app" | grep -q . && docker stop spring-boot-app && docker rm spring-boot-app | true
+
+                # 기존 이미지 삭제
+                docker rmi spring-boot-app:imgfile | true
+
+                # 새 이미지 생성
+                docker build -t spring-boot-app:imgfile .
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
-                sh './gradlew bootRun'
+                sh '''
+                # 새 이미지로 컨테이너 실행
+                docker run -d -p 8080:8080 --name spring-boot-app \
+                -e AWS_REGION=$AWS_REGION \
+                -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                -e mysql_rds_pw=$mysql_rds_pw \
+                -e openai_api_key=$openai_api_key \
+                -e youtube_api_key=$youtube_api_key \
+                -e mysql_rds_id=$mysql_rds_id \
+                -e kafka_connection_ip=$kafka_connection_ip \
+                -e mysql_rds_url=$mysql_rds_url \
+                spring-boot-app:imgfile
+                '''
             }
         }
     }
