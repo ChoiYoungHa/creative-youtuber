@@ -6,14 +6,14 @@ spring:
       ddl-auto: none
     show-sql: true
   datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:tcp://localhost/~/jpashop
-#    username: sa
-#    password :
-     driver-class-name: com.mysql.cj.jdbc.Driver
-     url: ${mysql_rds_url}
-     username: ${mysql_rds_id}
-     password: ${mysql_rds_pw}
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://localhost/~/jpashop
+    username: sa
+    password :
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#     url: ${mysql_rds_url}
+#     username: ${mysql_rds_id}
+#     password: ${mysql_rds_pw}
   servlet:
     mime-mappings:
       otf: "font/otf"
