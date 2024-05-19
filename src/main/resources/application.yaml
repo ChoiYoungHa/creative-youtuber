@@ -36,9 +36,6 @@ logging:
             sql:
               BasicBinder: TRACE
 
-
-
-
 openai:
   api:
     key: ${openai_api_key}
@@ -46,6 +43,9 @@ openai:
 youtube:
   api:
     key: ${youtube_api_key}
+
+ec2:
+  ip : ${local_ip}
 
 
 
