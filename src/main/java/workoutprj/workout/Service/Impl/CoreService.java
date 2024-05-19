@@ -33,7 +33,7 @@ public class CoreService implements ICoreService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${openai.api.key}")
+    @Value("${openai_api_key}")
     private String apiKey;
 
     @Value("${youtube.api.key}")
