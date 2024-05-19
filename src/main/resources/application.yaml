@@ -6,20 +6,20 @@ spring:
       ddl-auto: none
     show-sql: true
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:tcp://localhost/~/jpashop
-    username: sa
-    password :
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#     url: jdbc:mysql://workout.c3yowissy77n.ap-northeast-2.rds.amazonaws.com:3306/workout?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#     username: admin
-#     password: Dnjfcjsaksdnjs1!
+#    driver-class-name: org.h2.Driver
+#    url: jdbc:h2:tcp://localhost/~/jpashop
+#    username: sa
+#    password :
+     driver-class-name: com.mysql.cj.jdbc.Driver
+     url: ${mysql_rds_url}
+     username: ${mysql_rds_id}
+     password: ${mysql_rds_pw}
   servlet:
     mime-mappings:
       otf: "font/otf"
   kafka:
     producer:
-      bootstrap-servers: 3.35.159.167:10000,3.35.159.167:10001,3.35.159.167:10002
+      bootstrap-servers: ${kafka_connection_ip}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
@@ -41,11 +41,11 @@ logging:
 
 openai:
   api:
-    key: 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
+    key: ${openai_api_key}
 
 youtube:
   api:
-    key: AIzaSyDtMFy7H4XjQDfii2mwZRPUygjootE5kEo
+    key: ${youtube_api_key}
 
 
 

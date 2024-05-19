@@ -1,0 +1,7 @@
+aws:
+  secretsmanager:
+    name: youtuber_prod_app
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
