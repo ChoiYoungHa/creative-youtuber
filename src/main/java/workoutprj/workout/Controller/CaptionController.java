@@ -22,16 +22,6 @@ public class CaptionController {
 
     private static final Logger logger = LoggerFactory.getLogger(CaptionController.class);
 
-    @PostMapping("/getCaption")
-    @ResponseBody
-    public String getCaption(HttpServletRequest request) {
-        String youtubeUrl = request.getParameter("youtubeUrl");
-
-        String videoId = youtubeUrl.split("v=")[1].trim();
-
-        logger.info("videoId: " + videoId);
-        return captionService.getCaption(videoId).block();
-    }
 
     @GetMapping("/subtitle")
     public String youtubeScript() {

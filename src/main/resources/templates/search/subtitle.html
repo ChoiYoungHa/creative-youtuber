@@ -100,10 +100,10 @@
         reloading_st();
 
         const formData = new FormData();
-        formData.append('youtubeUrl', youtube_url);
+        formData.append('youtube_url', youtube_url);
 
         try {
-            const response = await fetch('/caption/getCaption', {
+            const response = await fetch('/core/getCaption', {
                 method: 'POST',
                 body: formData
             });
@@ -113,6 +113,7 @@
             }
 
             const data = await response.json();
+            console.log(data)
             if (data.length === 0) {
                 alert("검색 결과가 없습니다.");
             }else {

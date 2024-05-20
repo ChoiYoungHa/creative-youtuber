@@ -3,15 +3,16 @@ package workoutprj.workout.Controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import workoutprj.workout.DTO.YoutubeDTO;
+import workoutprj.workout.Service.Impl.CaptionService;
 import workoutprj.workout.Service.Impl.CoreService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -19,18 +20,22 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/core")
+@RequiredArgsConstructor
+@Slf4j
 public class CoreController {
-    @Resource(name = "CoreService")
-    private CoreService coreService;
 
-    private static final Logger logger = LoggerFactory.getLogger(CoreController.class);
+
+    private final CoreService coreService;
+    private final CaptionService captionService;
+
+    
 
     // 유튜브 대본에 핵심 키워드만 추출해주는 어시스턴트
     @PostMapping("/youtube-reference")
     @ResponseBody
     public List<YoutubeDTO> youtubeReference(HttpServletRequest request) throws JsonProcessingException, InterruptedException {
         String content = request.getParameter("content");
-        logger.info("content: " + content);
+        log.info("content: " + content);
         List<YoutubeDTO> response = coreService.youtubeReference(content);
 
         return response;
@@ -42,14 +47,22 @@ public class CoreController {
     @ResponseBody
     public List<YoutubeDTO> youtubeBenchmarking(HttpServletRequest request) throws JsonProcessingException {
         String keyword = request.getParameter("keyword");
+        log.info("keyword : " + keyword);
         List<YoutubeDTO> response = coreService.youtubeBenchmarking(keyword);
 
         return response;
     }
 
-    // caption 서비스랑 여기로 옮기기
+    @PostMapping("/getCaption")
+    @ResponseBody
+    public String getCaption(HttpServletRequest request) {
+        String youtube_url = request.getParameter("youtube_url");
 
+        String videoId = youtube_url.split("v=")[1].trim();
 
+        log.info("videoId: " + videoId);
+        return captionService.getCaption(videoId).block();
+    }
 
 
     // 참고자료 찾기 페이지이동
