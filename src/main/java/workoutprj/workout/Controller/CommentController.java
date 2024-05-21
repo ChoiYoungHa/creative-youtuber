@@ -27,8 +27,8 @@ public class CommentController {
 
 
     // 댓글등록
-    @PostMapping("createComment")
-    public ResponseEntity<String> createComment(@RequestBody CommentDTO commentDTO, HttpSession session) {
+    @PostMapping("/write")
+    public ResponseEntity<String> createComment(@RequestBody CommentDTO commentDTO) {
 
         if (commentDTO.getMember_id() == null) {
             return ResponseEntity.status(403).body("로그인이 필요합니다.");
@@ -73,6 +73,7 @@ public class CommentController {
         }
     }
 
+    // 댓글 삭제요청
     @PostMapping("/deleteComment/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long id) {
 

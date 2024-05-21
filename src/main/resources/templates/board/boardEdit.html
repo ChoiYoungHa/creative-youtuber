@@ -42,7 +42,7 @@
                     <div class="single-post">
                         <div class="blog_details">
                             <div class="blog-author">
-                                <form th:action="@{/board/boardEditUpdate/{boardId}(boardId=${boardDetail.board_id})}" th:method="post" onsubmit="return doSubmit(this);">
+                                <form th:action="@{/board/edit/{boardId}(boardId=${boardDetail.board_id})}" th:method="post" onsubmit="return doSubmit(this);">
                                     <div class="quote-wrapper">
                                         <div>
                                             <div class="row col-lg-12"><input class="single-input font-weight-bold" id="title" name="title" type="text" th:value="${boardDetail.board_title}"></div>

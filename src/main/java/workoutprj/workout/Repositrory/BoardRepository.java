@@ -30,7 +30,6 @@ public class BoardRepository {
      */
     @Transactional
     public void createBoard(BoardDTO board) {
-        // 어떤 맴버가 제목, 내용을 등록했는지
         Long memberId = board.getMember_id();
         Member member = em.find(Member.class, memberId);
 
@@ -40,8 +39,6 @@ public class BoardRepository {
         entity.setBoard_click(0);
         entity.setMember(member);
 
-        // 이러면 member_id가 board에 저장이 될까?
-        //entity.setMember(member);
         em.persist(entity);
     }
 

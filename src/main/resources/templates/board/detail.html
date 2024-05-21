@@ -82,7 +82,7 @@
                                         <a th:if="${session?.SS_MEMBER_ID != null and session.SS_MEMBER_ID == boardDetail.member_id}" class="genric-btn primary-border"
                                            th:href="@{/board/boardEdit/{boardId} (boardId=${boardDetail.board_id})}">수정</a>
                                         <a th:if="${session?.SS_MEMBER_ID != null and session.SS_MEMBER_ID == boardDetail.member_id}" class="genric-btn primary-border"
-                                           th:href="@{/board/boardDelete/{boardId} (boardId=${boardDetail.board_id})}">삭제</a>
+                                           th:href="@{/board/delete/{boardId} (boardId=${boardDetail.board_id})}">삭제</a>
                                     </div>
                                 </div>
                             </div>

@@ -50,12 +50,11 @@ public class BoardController {
     }
 
     // 게시물 등록
-    @PostMapping("/insertBorad")
-    public String insertBoard(HttpServletRequest request, HttpSession session, Model model) {
+    @PostMapping("/write")
+    public String insertBoard(HttpServletRequest request, HttpSession session) {
         String title = request.getParameter("title");
         String contents = request.getParameter("contents");
 
-        // memberId를 repository에 넘긴 후 member 찾아서 jpql을 해야하나 아님 find를해서 name을 넣어줘야하나 물어보자.
         Long ssMemberId = (Long) session.getAttribute("SS_MEMBER_ID");
 
         BoardDTO bDTO = new BoardDTO();
@@ -126,7 +125,7 @@ public class BoardController {
 
 
     // 게시물 수정
-    @PostMapping("/boardEditUpdate/{boardId}")
+    @PostMapping("/edit/{boardId}")
     public String boardEditUpdate(@PathVariable("boardId") Long boardId, HttpServletRequest request, Model model) {
         String title = request.getParameter("title");
         String content = request.getParameter("content");
@@ -142,7 +141,7 @@ public class BoardController {
     }
 
     // 게시물 삭제
-    @GetMapping("/boardDelete/{boardId}")
+    @GetMapping("/delete/{boardId}")
     public String boardDelete(@PathVariable("boardId") Long boardId, HttpSession session, Model model) {
         Long userId = (Long) session.getAttribute("SS_MEMBER_ID");
         if (userId == null) {
@@ -178,7 +177,7 @@ public class BoardController {
         }
     }
 
-    @GetMapping("/searchBoard")
+    @GetMapping("/search")
     public String searchBoard(HttpServletRequest request,Model model) {
         String q = request.getParameter("keyword");
         String category = request.getParameter("searchType");
