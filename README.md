@@ -65,12 +65,4 @@ https://www.notion.so/API-467ec61273c841918440c3f9ce76c146?pvs=4
     - 공통 응답, 공통 에러 헨들러, 로그 설정 등을 정의함
 
 ## 5. 모니터링 시스템 추가
-- 데이터 파이프라인 구축
-  - Spring Boot log -> Kafka -> Logstash -> OpenSearch
-  - 로그 발생 -> 실시간 로그 수집 -> 실시간 데이터 변환 -> 대시보드 시각화
-- Spring WebFlux
-  - WebClient를 이용한 비동기 및 논블로킹 방식의 HTTP 요청
-  - 외부 API에 비동기 요청 후 응답은 논블로킹 방식으로 처리 동시성 및 성능 최적화
-
-- 시스템 아키텍처
-  - <img width="782" alt="springboot monitoring" src="https://github.com/ChoiYoungHa/creative-youtuber/assets/64997345/429444c6-330a-4992-ae25-5699a61caab9">
+- https://future-zydeco-6c6.notion.site/670305a47f6846c7a7bff0e1914720ea
