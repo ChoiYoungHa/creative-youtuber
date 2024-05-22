@@ -2,7 +2,7 @@ FROM openjdk:17-jdk
 
 WORKDIR /app
 
-COPY ./build/libs/workout-0.0.1-SNAPSHOT.jar app.jar
+COPY ./build/libs/creativeyoutuber-0.0.1-SNAPSHOT.jar
 
 EXPOSE 8080
 
