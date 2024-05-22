@@ -177,6 +177,7 @@ public class BoardController {
         }
     }
 
+    // 게시물 검색
     @GetMapping("/search")
     public String searchBoard(HttpServletRequest request,Model model) {
         String q = request.getParameter("keyword");
