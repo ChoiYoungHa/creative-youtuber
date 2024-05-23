@@ -3,17 +3,16 @@ package creativeprj.creative.Service.Impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import creativeprj.creative.Utils.RestUtils;
 import lombok.Getter;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,60 +23,56 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service("CoreService")
+@Slf4j
 public class CoreService implements ICoreService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CoreService.class);
     private static final String CORE_ASSISTANTS = "asst_JfxJ0itTR9W5gWTD2bFZcP9R";
+    // thread 생성 url
+    private static final String CREATE_THREAD_URL = "https://api.openai.com/v1/threads";
 
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${openai.api.key}")
-    private String apiKey;
 
     @Value("${youtube.api.key}")
     private String youtubeApiKey;
 
 
 
-    // 중복되는 헤더 생성
-    private HttpHeaders createHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
-        headers.set("OpenAI-Beta", "assistants=v1");
-        return headers;
-    }
-
-
     // 어시스턴트 스레드 생성
+
+    /**@regdate 24.05.22
+     * @return String Assistant Thread Id
+     * @throws JsonProcessingException
+     * @ 테스트 코드 검증차례
+     */
     public String createThread() throws JsonProcessingException {
 
         // 스레드 id 생성
-        HttpHeaders headers = createHeaders();
-
+        HttpHeaders headers = RestUtils.createHeaders();
         String requestBody = "{}";
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                "https://api.openai.com/v1/threads",
-                HttpMethod.POST,
-                entity,
-                String.class);
-
-        // Parse the JSON response to extract the "id"
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response.getBody());
-        return rootNode.path("id").asText();
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    CREATE_THREAD_URL,
+                    HttpMethod.POST,
+                    entity,
+                    String.class);
+            return RestUtils.jsonNodeGetId(response.getBody());
+        } catch (Exception e) {
+            log.error("create thread id fail {}",e.getMessage());
+            throw new RuntimeException("create thread fail", e);
+        }
 
     }
 
     // 어시스턴트 스레드 공간에서 메시지를 생성함.
     public String createMessage(String threadId, String content) throws JsonProcessingException {
 
-        HttpHeaders headers = createHeaders();
+        HttpHeaders headers = RestUtils.createHeaders();
 
         // 어시스턴트가 요청한 것인지, 유저가 요청한 것인지 구분
         String role = "user";
@@ -105,19 +100,21 @@ public class CoreService implements ICoreService {
 
     // run 객체 응답상태 확인(status="completed" or "queued") gpt가 메시지 생성중
     public String getRunStatus(String threadId, String runId) throws JsonProcessingException {
-        HttpHeaders headers = createHeaders();
+
+        HttpHeaders headers = RestUtils.createHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         String url = "https://api.openai.com/v1/threads/" + threadId + "/runs/" + runId;
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
-        logger.info(response.getBody());
+        log.info(response.getBody());
         String status = new ObjectMapper().readTree(response.getBody()).path("status").asText();
-        logger.info(status);
+        log.info(status);
         return status;
     }
 
     // 메시지 응답을 가져옴
     public String fetchMessages(String threadId) throws JsonProcessingException {
-        HttpHeaders headers = createHeaders();
+
+        HttpHeaders headers = RestUtils.createHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         String url = "https://api.openai.com/v1/threads/" + threadId + "/messages";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
@@ -135,7 +132,7 @@ public class CoreService implements ICoreService {
 
         // 스레드 실행
         String runId = startThreadRun(threadId, assistantId);
-        logger.info("runId : " + runId);
+        log.info("runId : " + runId);
 
         // 답변이 완성 됐는지 2초마다 30초 체크
         boolean isCompleted = awaitRunCompletion(threadId, runId);
@@ -148,7 +145,7 @@ public class CoreService implements ICoreService {
 
     // 생성한 스레드 실행 (메시지와 함께 전송)
     private String startThreadRun(String threadId, String assistantId) throws JsonProcessingException {
-        HttpHeaders headers = createHeaders();
+        HttpHeaders headers = RestUtils.createHeaders();
         String json = new ObjectMapper().writeValueAsString(new RunRequest(assistantId));
         HttpEntity<String> requestEntity = new HttpEntity<>(json, headers);
         String url = "https://api.openai.com/v1/threads/" + threadId + "/runs";
@@ -157,7 +154,7 @@ public class CoreService implements ICoreService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readTree(response.getBody());
         String runId = rootNode.path("id").asText();
-        logger.info("runId : " + runId);
+        log.info("runId : " + runId);
         return runId;
     }
 
@@ -170,7 +167,7 @@ public class CoreService implements ICoreService {
         // 최소 1번 실행보장
         do {
             if (System.currentTimeMillis() - startTime > timeout) {
-                logger.info("Timeout exceeded while waiting for run to complete.");
+                log.info("Timeout exceeded while waiting for run to complete.");
                 return false; // Exit loop after timeout
             }
 
@@ -346,23 +343,23 @@ public class CoreService implements ICoreService {
         // openai rest 요청해서 대본 또는 요청사항을 맥락에 따라 핵심 키워드 1개 선정
         // 어시스턴트 스레드 생성
         String threadId = createThread();
-        logger.info("threadId : " + threadId);
+        log.info("threadId : " + threadId);
         // 메시지가 생성된 스레드에 추가됐고, 메시지id를 받아옴
         String messageId = createMessage(threadId, ask);
-        logger.info("messageId : " + messageId);
+        log.info("messageId : " + messageId);
 
         // run thread를 실행시키고, 메시지 응답을 2초마다 기다림.
         // 응답이 완료되면 답변을 반환
         String result_response = checkRunCompletion(threadId, CORE_ASSISTANTS);
-        logger.info("result_response: " + result_response);
+        log.info("result_response: " + result_response);
 
         String q = result_response.split(":")[1].trim();
         q = q.replaceAll("[^a-zA-Z0-9가-힣 ]", "");
-        logger.info("q:" + q);
+        log.info("q:" + q);
 
         //키워드로 youtube api에 대본의 핵심 키워드로 유튜브 검색
         String result = searchVideos(q);
-        logger.info(result);
+        log.info(result);
 
         // 유튜브 검색결과를 DTO로 매핑
         List<YoutubeDTO> youtubeDTOS = parseYoutubeSearchResult(result);
