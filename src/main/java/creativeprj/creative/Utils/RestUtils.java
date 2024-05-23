@@ -31,10 +31,10 @@ public class RestUtils {
      * @throws JsonProcessingException
      * @expain String json 데이터의 id 값반환
      */
-    public static String jsonNodeGetId(String responseBody) throws JsonProcessingException {
+    public static String jsonNodeGetTarget(String responseBody, String target) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
-        return jsonNode.path("id").asText();
+        return jsonNode.path(target).asText();
     }
 
 

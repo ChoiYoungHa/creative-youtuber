@@ -61,7 +61,7 @@ public class CoreService implements ICoreService {
                     HttpMethod.POST,
                     entity,
                     String.class);
-            return RestUtils.jsonNodeGetId(response.getBody());
+            return RestUtils.jsonNodeGetTarget(response.getBody(), "id");
         } catch (Exception e) {
             log.error("create thread id fail {}",e.getMessage());
             throw new RuntimeException("create thread fail", e);

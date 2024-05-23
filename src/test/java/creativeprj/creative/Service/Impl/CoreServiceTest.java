@@ -1,6 +1,7 @@
 package creativeprj.creative.Service.Impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import creativeprj.creative.Utils.AwsSecretManagerUtil;
 import creativeprj.creative.Utils.RestUtils;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +35,7 @@ class CoreServiceTest {
                 "}\n";
 
         //when
-        String id = RestUtils.jsonNodeGetId(json);
+        String id = RestUtils.jsonNodeGetTarget(json, "id");
 
         //then
         assertEquals("thread_abc123", id);
@@ -42,10 +43,14 @@ class CoreServiceTest {
 
 
     @Test
-    void requestOpenAiCreateThread(){
+    void requestOpenAiCreateThread() throws JsonProcessingException {
         RestAssured.baseURI = "https://api.openai.com/v1/threads";
         HttpHeaders headers = RestUtils.createHeaders();
-        String apiKey = "aws secretkey";
+        String secretName = "/secret/youtuber_prod_app";
+        String secretJson = AwsSecretManagerUtil.getSecret(secretName);
+        String apiKey = RestUtils.jsonNodeGetTarget(secretJson, "openai_api_key");
+
+        System.out.println(apiKey);
 
         given().
                 header("Content-Type", headers.getContentType().toString()).
@@ -57,4 +62,8 @@ class CoreServiceTest {
                     statusCode(200).
                     body("object", equalTo("thread"));
     }
+
+
+
+
 }

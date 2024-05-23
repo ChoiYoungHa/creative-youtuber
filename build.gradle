@@ -36,7 +36,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-reactor-netty:3.2.5'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.4'
 
-
+	implementation 'software.amazon.awssdk:secretsmanager:2.20.13'
+	implementation 'software.amazon.awssdk:core:2.20.13'
 	implementation 'org.springframework.boot:spring-boot-devtools'
 
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
