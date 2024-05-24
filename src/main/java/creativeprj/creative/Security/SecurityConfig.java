@@ -17,11 +17,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(authz -> authz
-                        .requestMatchers("/auth/login",
-                                "/auth/signup",
-                                "/core/youtube-reference",
-                                "/core/benchmarking",
-                                "/core/getCaption").permitAll()
+                        .anyRequest().permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(httpBasic -> httpBasic.disable());
 
