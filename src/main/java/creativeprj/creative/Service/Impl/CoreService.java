@@ -41,12 +41,11 @@ public class CoreService implements ICoreService {
 
 
 
-    // 어시스턴트 스레드 생성
-
     /**@regdate 24.05.22
      * @return String Assistant Thread Id
      * @throws JsonProcessingException
-     * @ 테스트 코드 검증차례
+     * @expain openAI assistants thread Id 생성
+     * @테스트 성공 24.05.23
      */
     public String createThread() throws JsonProcessingException {
 

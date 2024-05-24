@@ -30,6 +30,7 @@ public class RestUtils {
      * @return Assistants threadId
      * @throws JsonProcessingException
      * @expain String json 데이터의 id 값반환
+     * @테스트 성공 24.05.23
      */
     public static String jsonNodeGetTarget(String responseBody, String target) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
