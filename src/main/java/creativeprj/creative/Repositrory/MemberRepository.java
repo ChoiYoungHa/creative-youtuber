@@ -54,4 +54,11 @@ public class MemberRepository {
         }
     }
 
+    // SpringSecurity 전용 이메일로 회원찾은 후 로그인
+    public Member findByEmail(String email) {
+            return em.createQuery("select m from Member as m where m.email = :email", Member.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+    }
+
 }
