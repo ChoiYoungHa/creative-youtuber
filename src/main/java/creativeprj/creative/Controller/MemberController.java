@@ -64,7 +64,7 @@ public class MemberController {
         session.removeAttribute("SS_MEMBER_ID");
         session.removeAttribute("SS_MEMBER_NICK");
         session.removeAttribute("SS_MEMBER_NAME");
-        return "redirect:core/findByReference";
+        return "redirect:/core/findByReference";
     }
 
     // 회원가입 페이지 이동
