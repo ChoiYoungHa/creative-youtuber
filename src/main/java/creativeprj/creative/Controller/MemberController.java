@@ -1,5 +1,6 @@
 package creativeprj.creative.Controller;
 
+import creativeprj.creative.Security.JwtTokenProvider;
 import creativeprj.creative.Service.Impl.CustomUserDetailService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,7 +41,8 @@ public class MemberController {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailService customUserDetailService;
 
-    private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final JwtTokenProvider jwtTokenProvider;
+
 
 
     // 로그인 페이지 이동
@@ -82,17 +85,14 @@ public class MemberController {
         log.info("password:" + password);
 
         try {
-            log.info("에러 발생 예정");
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
-            log.info("여기까지 안 옴");
             UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
-            String token = Jwts.builder()
-                    .setSubject(email)
-                    .setExpiration(new Date(System.currentTimeMillis() + 86400000))
-                    .signWith(key)
-                    .compact();
+            Member member = memberService.login(email, password);
+            String memberId = String.valueOf(member.getMember_id());
+
+            String token = jwtTokenProvider.createToken(email,memberId);
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
             return response;

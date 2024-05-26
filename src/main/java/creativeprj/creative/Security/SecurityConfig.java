@@ -25,6 +25,8 @@ public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
     private final CustomAuthenticationProvider customAuthenticationProvider;
+    private final JwtTokenProvider jwtTokenProvider;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
@@ -32,15 +34,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(authz -> authz
-                        .anyRequest().permitAll())
+                        .requestMatchers(
+                                "/board/write",
+                                "/board/edit/*",
+                                "/board/delete/*",
+                                "/board/boardEdit",
+                                "/comment/write",
+                                "/comment/edit/*",
+                                "/comment/delete/*"
+                        ).authenticated()  // 특정 경로는 인증 필요
+                        .anyRequest().permitAll())  // 나머지 요청은 인증 없이 접근 가능
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .addFilterBefore(new JwtAuthenticationFilter(authenticationManager,
-                        customUserDetailService), UsernamePasswordAuthenticationFilter.class);
+                        customUserDetailService, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(customUserDetailService);
         auth.authenticationProvider(customAuthenticationProvider);
     }
     @Bean

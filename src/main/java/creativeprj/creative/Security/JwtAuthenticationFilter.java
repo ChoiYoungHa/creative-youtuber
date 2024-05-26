@@ -22,12 +22,15 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
-    private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final CustomUserDetailService customUserDetailService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, CustomUserDetailService customUserDetailService) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, CustomUserDetailService customUserDetailService,
+                                   JwtTokenProvider jwtTokenProvider) {
         super(authenticationManager);
         this.customUserDetailService = customUserDetailService;
+        this.jwtTokenProvider = jwtTokenProvider;
+
     }
 
     @Override
@@ -39,17 +42,25 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
+
         String token = header.substring(7);
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        String email = claims.getSubject();
 
-        if (email != null) {
-            UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,
-                    null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            Claims claims = jwtTokenProvider.getClaimsFromToken(token);
+            String email = claims.getSubject();
 
+            if (email != null) {
+                UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,
+                        null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
+            }
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+            return;
         }
+
         chain.doFilter(request, response);
     }
 }
