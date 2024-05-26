@@ -1,20 +1,34 @@
 package creativeprj.creative.Controller;
 
+import creativeprj.creative.Security.JwtTokenProvider;
+import creativeprj.creative.Service.Impl.CustomUserDetailService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import creativeprj.creative.Domain.Member;
 import creativeprj.creative.Exception.EmailAlreadyExistsException;
 import creativeprj.creative.Service.Impl.MemberService;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @Slf4j
@@ -23,6 +37,12 @@ import creativeprj.creative.Service.Impl.MemberService;
 public class MemberController {
 
     private final MemberService memberService;
+
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailService customUserDetailService;
+
+    private final JwtTokenProvider jwtTokenProvider;
+
 
 
     // 로그인 페이지 이동
@@ -36,27 +56,52 @@ public class MemberController {
         return "user/login";
     }
 
-    // 로그인
-    @PostMapping("/login")
-    public String getLogin(HttpServletRequest request, Model model, HttpSession session) {
-        log.info("getLogin Start!");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+    // 세션 로그인
+//    @PostMapping("/login")
+//    public String getLogin(HttpServletRequest request, Model model, HttpSession session) {
+//        log.info("getLogin Start!");
+//        String email = request.getParameter("email");
+//        String password = request.getParameter("password");
+//
+//        log.info("login start!");
+//        try {
+//            Member member = memberService.login(email, password);
+//            log.info("login success");
+//            session.setAttribute("SS_MEMBER_ID", member.getMember_id());
+//            session.setAttribute("SS_MEMBER_NAME", member.getUser_name());
+//            session.setAttribute("SS_MEMBER_NICK", member.getNickname());
+//            return "redirect:/core/findByReference";
+//        } catch (IllegalStateException e) {
+//            log.info("로그인 실패");
+//            model.addAttribute("error", e.getMessage());
+//            return "user/login";
+//        }
+//    }
 
-        log.info("login start!");
+    @PostMapping("/login")
+    @ResponseBody
+    public Map<String, String> login(@RequestParam String email, @RequestParam String password) {
+        log.info("email:" + email);
+        log.info("password:" + password);
+
         try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+            UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
             Member member = memberService.login(email, password);
-            log.info("login success");
-            session.setAttribute("SS_MEMBER_ID", member.getMember_id());
-            session.setAttribute("SS_MEMBER_NAME", member.getUser_name());
-            session.setAttribute("SS_MEMBER_NICK", member.getNickname());
-            return "redirect:/core/findByReference";
-        } catch (IllegalStateException e) {
-            log.info("로그인 실패");
-            model.addAttribute("error", e.getMessage());
-            return "user/login";
+            String memberId = String.valueOf(member.getMember_id());
+
+            String token = jwtTokenProvider.createToken(email,memberId);
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            return response;
+        } catch (AuthenticationException e) {
+            throw new RuntimeException("존재하지 않는 회원이거나 이메일 패스워드가 틀렸습니다.");
         }
     }
+
+
 
     // 로그아웃
     @GetMapping("/logout")

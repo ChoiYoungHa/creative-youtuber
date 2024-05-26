@@ -46,6 +46,7 @@ public class BoardController {
     // 게시물 등록 이동
     @GetMapping("/createBoard")
     public String createBoard() {
+        log.info("move createBoard");
         return "board/createBoard";
     }
 

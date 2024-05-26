@@ -14,7 +14,7 @@
 <main class="login-body">
     <!-- Login Admin -->
     <div id="errorMessage" style="display: none;" th:text="${error}"></div>
-    <form class="form-default" action="/auth/login" method="POST" onsubmit="return loginChk()">
+    <form class="form-default" onsubmit="return loginChk(event)">
         <div class="login-form">
             <h2>로그인</h2>
             <div class="form-input">
@@ -50,16 +50,49 @@
         }
     });
 
-    function loginChk() {
+    function loginChk(event) {
+        event.preventDefault();
         const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
         const expEmail = /^[A-Za-z0-9_.-]+@[A-Za-z0-9-]+\.[A-Za-z0-9-]+$/;
+
         if (!expEmail.test(email)) {
-            console.log("유효하지 않은 이메일 형식");
             Swal.fire('유효한 이메일 주소를 입력해주세요.');
             return false; // 폼 제출 방지
         }
 
-        return true; // 폼 제출 허용
+        // 로그인 요청
+        fetch('/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'email': email,
+                'password': password
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem('jwtToken', data.token);
+                    Swal.fire({
+                        title: '성공!',
+                        text: '로그인 성공.',
+                        icon: 'success',
+                        confirmButtonText: '확인'
+                    }).then(() => {
+                        window.location.href = '/'; // 로그인 후 리디렉션
+                    });
+                } else {
+                    Swal.fire('로그인 실패', '이메일 또는 비밀번호가 잘못되었습니다.', 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('로그인 실패', '서버와의 통신 중 오류가 발생했습니다.', 'error');
+            });
+
+        return false;
     }
     window.onload = function() {
         // Get the error message from the hidden div

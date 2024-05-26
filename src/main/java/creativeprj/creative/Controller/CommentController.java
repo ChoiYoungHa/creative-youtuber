@@ -54,7 +54,7 @@ public class CommentController {
     }
 
     // 댓글 수정요청
-    @PostMapping("editComment/{commentId}")
+    @PostMapping("edit/{commentId}")
     public ResponseEntity<?> editComment(@PathVariable("commentId") Long id, @RequestBody ViewCommentDTO pDTO) {
 
         String commentContent = pDTO.getComment_content();
@@ -70,7 +70,7 @@ public class CommentController {
     }
 
     // 댓글 삭제요청
-    @PostMapping("/deleteComment/{commentId}")
+    @PostMapping("/delete/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long id) {
 
         try {

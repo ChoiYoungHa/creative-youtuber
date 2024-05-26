@@ -115,10 +115,9 @@
 
     /* 댓글 등록 요청 */
     async function submitComment() {
-        console.log("click?")
         const commentContent = document.getElementById('commentContent').value;
         const boardId = /*[[${boardDetail.board_id}]]*/ 'boardId';
-        const memberId = /*[[${session.SS_MEMBER_ID}]]*/ 'memberId';
+        const memberId = /*[[${session.SS_MEMBER_ID}]]*/ 'memberId'; // jwt 사용할 때 memberId는 어떻게...?
 
         if (commentContent.trim() === '') {
             Swal.fire('댓글을 작성해주세요.');
@@ -126,7 +125,7 @@
         }
 
         try {
-            const response = await fetch("/comment/createComment", {
+            const response = await fetch("/comment/write", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
