@@ -15,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 
 import javax.crypto.SecretKey;
 
@@ -23,6 +24,7 @@ import javax.crypto.SecretKey;
 public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
+    private final CustomAuthenticationProvider customAuthenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
@@ -32,10 +34,15 @@ public class SecurityConfig {
                 .authorizeRequests(authz -> authz
                         .anyRequest().permitAll())
                 .httpBasic(httpBasic -> httpBasic.disable())
-                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager,customUserDetailService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager,
+                        customUserDetailService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
+    @Autowired
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(customAuthenticationProvider);
+    }
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

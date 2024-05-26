@@ -30,7 +30,7 @@ public class CustomUserDetailService implements UserDetailsService {
         return new User(
                 member.getEmail(),
                 member.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(""))
+                Collections.emptyList()
         );
     }
 

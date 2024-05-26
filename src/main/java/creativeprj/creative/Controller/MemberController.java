@@ -78,10 +78,15 @@ public class MemberController {
     @PostMapping("/login")
     @ResponseBody
     public Map<String, String> login(@RequestParam String email, @RequestParam String password) {
+        log.info("email:" + email);
+        log.info("password:" + password);
+
         try {
+            log.info("에러 발생 예정");
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
+            log.info("여기까지 안 옴");
             UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
             String token = Jwts.builder()
                     .setSubject(email)
