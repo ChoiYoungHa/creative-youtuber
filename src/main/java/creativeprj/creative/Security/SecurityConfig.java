@@ -38,7 +38,7 @@ public class SecurityConfig {
                                 "/board/write",
                                 "/board/edit/*",
                                 "/board/delete/*",
-                                "/board/boardEdit",
+                                "/board/boardEdit/*",
                                 "/comment/write",
                                 "/comment/edit/*",
                                 "/comment/delete/*"

@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import creativeprj.creative.Service.Impl.BoardService;
 
 import javax.naming.NoPermissionException;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/board")
@@ -46,20 +49,20 @@ public class BoardController {
     // 게시물 등록 이동
     @GetMapping("/createBoard")
     public String createBoard() {
-        log.info("move createBoard");
         return "board/createBoard";
     }
 
     // 게시물 등록
     @PostMapping("/write")
-    public String insertBoard(HttpServletRequest request, HttpSession session) {
+    public String insertBoard(HttpServletRequest request) {
         String title = request.getParameter("title");
         String contents = request.getParameter("contents");
+        String member_id = request.getParameter("member_id");
 
-        Long ssMemberId = (Long) session.getAttribute("SS_MEMBER_ID");
+        long memberId = Long.parseLong(member_id);
 
         BoardDTO bDTO = new BoardDTO();
-        bDTO.setMember_id(ssMemberId);
+        bDTO.setMember_id(memberId);
         bDTO.setBoard_name(title);
         bDTO.setBoard_content(contents);
 
@@ -92,22 +95,20 @@ public class BoardController {
     }
 
     // 게시판 수정 페이지 이동
-    @GetMapping("/boardEdit/{boardId}")
-    public String boardEdit(@PathVariable("boardId") Long boardId, Model model, HttpSession session) throws NoPermissionException {
+    @GetMapping("/boardEdit/{boardId}/{memberId}")
+    public String boardEdit(@PathVariable Long boardId, @PathVariable Long memberId, HttpServletRequest request, Model model) throws NoPermissionException {
 
         // 비로그인 유저가 게시물 수정 url 요청을 보냈을 때.
-        Long userId = (Long) session.getAttribute("SS_MEMBER_ID");
-        if (userId == null) {
+        if (memberId == null) {
             model.addAttribute("error", "로그인이 필요한 기능입니다.");
             return "user/login";
         }
-
 
         // 세션이 존재하는데, 해당 게시물의 작성자인지 확인하는 벨리데이션 로직이 필요함
         try {
             BoardDetailDTO board = boardService.findBoard(boardId);
             // 게시물의 작성자 ID와 세션 사용자 ID 비교
-            if (!board.getMember_id().equals(userId)) {
+            if (!board.getMember_id().equals(memberId)) {
                 throw new NoPermissionException("수정 권한이 없습니다.");
             }
             model.addAttribute("boardDetail", board);
@@ -116,10 +117,6 @@ public class BoardController {
         } catch (NotFindBoardException e) {
             model.addAttribute("error", e.getMessage());
             log.info("존재하지 않는 게시물");
-            return "search/findByReference";  // 기본 페이지로 리다이렉트
-        } catch (NoPermissionException e) {
-            model.addAttribute("error", e.getMessage());
-            log.info("수정 권한 없음");
             return "search/findByReference";  // 기본 페이지로 리다이렉트
         }
     }

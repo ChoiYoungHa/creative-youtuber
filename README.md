@@ -12,13 +12,16 @@
 
 
 ### Backend
-
-- gradle project
-- spring boot 3.x
-- java 17
+- Gradle Project
+- Spring Boot 3.x
+- Spring Security
+- Spring Webclient
+- Java 17
 - mysql 8.x
-- spring data jpa
+- JPA
+- JWT
 - thymleaf
+- Flask
 
 ### Infra
 
@@ -26,8 +29,11 @@
     - EC2
     - RDS
     - Route53
+    - SecretManager
+    - IAM
 - Docker
-- Jenkins CI/CD
+- Docker-Compose
+- Jenkins
 - Nginx
 
 ### ETC
@@ -48,9 +54,6 @@
 https://www.notion.so/API-467ec61273c841918440c3f9ce76c146?pvs=4
 
 ## 4. 모듈구조
-
-
-
 **모델 계층의 의존 관계 흐름**
 
 - application : xxxController, xxxService
@@ -65,4 +68,6 @@ https://www.notion.so/API-467ec61273c841918440c3f9ce76c146?pvs=4
     - 공통 응답, 공통 에러 헨들러, 로그 설정 등을 정의함
 
 ## 5. 모니터링 시스템 추가
+- 데이터 파이프라인 구축 : Spring Boot -> WebClient Server -> Kafka -> Logstash -> OpenSearch
+- OpenSearch Kibana를 통한 실시간 네트워크 상태 모니터링 구현
 - https://future-zydeco-6c6.notion.site/670305a47f6846c7a7bff0e1914720ea

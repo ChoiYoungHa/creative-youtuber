@@ -79,15 +79,17 @@
                                 </div>
                                 <div class="comments-area">
                                     <div class="comment-list">
-                                        <a th:if="${session?.SS_MEMBER_ID != null and session.SS_MEMBER_ID == boardDetail.member_id}" class="genric-btn primary-border"
-                                           th:href="@{/board/boardEdit/{boardId} (boardId=${boardDetail.board_id})}">수정</a>
-                                        <a th:if="${session?.SS_MEMBER_ID != null and session.SS_MEMBER_ID == boardDetail.member_id}" class="genric-btn primary-border"
+                                        <a class="genric-btn primary-border" id="board_update_button" onclick="update_validation(event)"
+                                           th:href="@{/board/boardEdit/{boardId}/{memberId} (boardId=${boardDetail.board_id})(memberId=${boardDetail.member_id})}">수정</a>
+                                        <a class="genric-btn primary-border"
                                            th:href="@{/board/delete/{boardId} (boardId=${boardDetail.board_id})}">삭제</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    
                 </div>
             </div>
         </div>
@@ -111,13 +113,34 @@
         }
     };
 
+    async function update_validation(){
+        let board_update_button = document.getElementById("board_update_button");
+        // 작성자
+        let owner = /*[[${boardDetail.member_id}]]*/ 'member_id';
+        console.log(owner)
+        // 수정버튼 누른사람
+        let member_id = getMemberIdFromToken();
+        console.log(member_id);
+        if (!member_id) {
+            event.preventDefault();
+            Swal.fire("로그인이 필요한 기능입니다.");
+        }
+        if (owner === member_id) {
+            window.location.href = href;
+        }else{
+            Swal.fire("해당 게시물을 수정할 권한이 없습니다.")
+        }
+    }
+
+
+
 
 
     /* 댓글 등록 요청 */
     async function submitComment() {
         const commentContent = document.getElementById('commentContent').value;
         const boardId = /*[[${boardDetail.board_id}]]*/ 'boardId';
-        const memberId = /*[[${session.SS_MEMBER_ID}]]*/ 'memberId'; // jwt 사용할 때 memberId는 어떻게...?
+        const memberId = /*[[${session.SS_MEMBER_ID}]]*/ 'memberId';
 
         if (commentContent.trim() === '') {
             Swal.fire('댓글을 작성해주세요.');

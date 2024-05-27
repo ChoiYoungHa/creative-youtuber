@@ -40,7 +40,7 @@
                     <div class="single-post">
                         <div class="blog_details">
                             <div class="blog-author">
-                                <form name="f" method="post" action="/board/write" onsubmit="return doSubmit();">
+                                <form name="f" onsubmit="return doSubmit(event);">
                                     <div class="quote-wrapper">
                                         <div>
                                             <div class="row col-lg-12"><input class="single-input font-weight-bold" id="title" name="title" type="text" placeholder="제목을 적어주세요"></div>
@@ -71,14 +71,47 @@
     function doSubmit() {
         const title = document.getElementById('title').value;
         const contents = document.getElementById('contents').value;
+        const member_id = getMemberIdFromToken();
+
+        console.log(member_id)
 
         // 모든 필드가 채워졌는지 검사
         if (title === '' || contents === '') {
             Swal.fire('모든 필드를 채워주세요.');
             return false;
         }
-        return true;
+
+        fetch('/board/write', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'title': title,
+                'contents': contents,
+                'member_id': member_id,
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire('게시물이 성공적으로 작성되었습니다.')
+                        .then(() => {
+                            window.location.href = '/board/boardList'; // 게시물 리스트 페이지로 리디렉션
+                        });
+                } else {
+                    return response.json().then(data => {
+                        Swal.fire('오류', data.message || '게시물 작성에 실패했습니다.', 'error');
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire('오류', '서버와의 통신 중 오류가 발생했습니다.', 'error');
+            });
+
+        return false;
     }
+
+
 
 </script>
 <div th:replace="~{include/footer :: footer}"></div>

@@ -48,16 +48,17 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             Claims claims = jwtTokenProvider.getClaimsFromToken(token);
             String email = claims.getSubject();
+            Long memberId = Long.valueOf(claims.get("member_id").toString());
+            request.setAttribute("memberId", memberId);
 
             if (email != null) {
                 UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,
                         null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
-
             }
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 만료되었습니다. 다시 로그인해주세요.");
             return;
         }
 
