@@ -79,12 +79,10 @@ public class BoardRepository {
     public void deleteBoard(Long id) {
         Board board = em.find(Board.class, id);
         if (board == null) {
-            throw new IllegalStateException("해당 게시물은 존재하지 않습니다.");
+            throw new NotFindBoardException("해당 게시물은 존재하지 않습니다.");
         }
 
-        em.createQuery("delete from Board b where b.board_id = :boardId")
-                .setParameter("boardId", id)
-                .executeUpdate();
+        em.remove(board);
     }
 
 
