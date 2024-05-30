@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             Claims claims = jwtTokenProvider.getClaimsFromToken(token);
             String email = claims.getSubject();
-            Long memberId = Long.valueOf(claims.get("member_id").toString());
+            Long memberId = Long.valueOf(claims.get("memberId").toString());
             request.setAttribute("memberId", memberId);
 
             if (email != null) {

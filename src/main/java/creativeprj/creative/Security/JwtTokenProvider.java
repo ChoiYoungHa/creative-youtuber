@@ -14,7 +14,7 @@ public class JwtTokenProvider {
 
     public String createToken(String email, String memberId) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("member_id", memberId);
+        claims.put("memberId", memberId);
 
         return Jwts.builder()
                 .setClaims(claims)

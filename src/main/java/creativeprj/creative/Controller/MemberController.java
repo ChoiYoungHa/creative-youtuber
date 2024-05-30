@@ -84,11 +84,13 @@ public class MemberController {
         log.info("email:" + email);
         log.info("password:" + password);
 
+        // authenticationManager 에서 인증이 성공 여부 확인을 위해 사용
+        // UsernamePasswordAuthenticationToken 이 customAuthenticationProvider 로 전달
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
-            UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
+
             Member member = memberService.login(email, password);
             String memberId = String.valueOf(member.getMember_id());
 

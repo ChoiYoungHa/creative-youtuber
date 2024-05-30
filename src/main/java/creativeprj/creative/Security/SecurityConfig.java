@@ -1,8 +1,7 @@
 package creativeprj.creative.Security;
 
+import creativeprj.creative.Exception.CustomAuthenticationEntryPoint;
 import creativeprj.creative.Service.Impl.CustomUserDetailService;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,14 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-
-import javax.crypto.SecretKey;
 
 @Configuration
 @RequiredArgsConstructor
@@ -45,6 +40,8 @@ public class SecurityConfig {
                         ).authenticated()  // 특정 경로는 인증 필요
                         .anyRequest().permitAll())  // 나머지 요청은 인증 없이 접근 가능
                 .httpBasic(httpBasic -> httpBasic.disable())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .addFilterBefore(new JwtAuthenticationFilter(authenticationManager,
                         customUserDetailService, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();

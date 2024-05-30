@@ -65,10 +65,11 @@ public class BoardRepository {
     @Transactional
     public void updateBoard(Long boardId, String boardName, String content) {
         Board board = em.find(Board.class, boardId);
-        if (board != null){
-            board.setBoard_content(content);
-            board.setBoard_name(boardName);
+        if (board == null) {
+            throw new NotFindBoardException("게시물을 찾을 수 없습니다.");
         }
+        board.setBoard_content(content);
+        board.setBoard_name(boardName);
     }
 
     /**

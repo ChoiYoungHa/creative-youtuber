@@ -1,9 +1,12 @@
 package creativeprj.creative.Controller;
 
+import creativeprj.creative.DTO.BoardEditRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jdk.jfr.Frequency;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,6 +17,7 @@ import creativeprj.creative.DTO.BoardDetailDTO;
 import creativeprj.creative.DTO.BoardViewDTO;
 import creativeprj.creative.Exception.NotFindBoardException;
 import creativeprj.creative.Service.Impl.BoardService;
+import reactor.netty.http.server.HttpServer;
 
 import javax.naming.NoPermissionException;
 import java.util.List;
@@ -94,84 +98,77 @@ public class BoardController {
         }
     }
 
-    // 게시판 수정 페이지 이동
-    @GetMapping("/boardEdit/{boardId}/{memberId}")
-    public String boardEdit(@PathVariable Long boardId, @PathVariable Long memberId, HttpServletRequest request, Model model) throws NoPermissionException {
+    // 게시판 수정 데이터 전달
+    @GetMapping("/boardEdit/{boardId}")
+    @ResponseBody
+    public ResponseEntity<?> boardEdit(@PathVariable Long boardId, HttpServletRequest request, Model model) throws NoPermissionException {
 
-        // 비로그인 유저가 게시물 수정 url 요청을 보냈을 때.
-        if (memberId == null) {
-            model.addAttribute("error", "로그인이 필요한 기능입니다.");
-            return "user/login";
-        }
+        Long memberId = (Long) request.getAttribute("memberId");
+        log.info("memberId : " + memberId);
 
-        // 세션이 존재하는데, 해당 게시물의 작성자인지 확인하는 벨리데이션 로직이 필요함
+        // 해당 게시물의 작성자인지 확인하는 벨리데이션 로직이 필요함
         try {
             BoardDetailDTO board = boardService.findBoard(boardId);
+
+
             // 게시물의 작성자 ID와 세션 사용자 ID 비교
             if (!board.getMember_id().equals(memberId)) {
-                throw new NoPermissionException("수정 권한이 없습니다.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 권한이 없습니다.");
             }
-            model.addAttribute("boardDetail", board);
-            log.info("게시물 내용 불러오기 성공");
-            return "board/boardEdit";  // 게시물 수정 페이지로 이동
+            return ResponseEntity.ok(board);
         } catch (NotFindBoardException e) {
-            model.addAttribute("error", e.getMessage());
-            log.info("존재하지 않는 게시물");
-            return "search/findByReference";  // 기본 페이지로 리다이렉트
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
         }
     }
 
 
     // 게시물 수정
     @PostMapping("/edit/{boardId}")
-    public String boardEditUpdate(@PathVariable("boardId") Long boardId, HttpServletRequest request, Model model) {
-        String title = request.getParameter("title");
-        String content = request.getParameter("content");
+    public ResponseEntity<String> boardEditUpdate(@PathVariable("boardId") Long boardId,
+                                                  @RequestBody BoardEditRequestDTO bDTO,
+                                                  HttpServletRequest request) {
+
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        String title = bDTO.getTitle();
+        String content = bDTO.getContent();
+
+        BoardDetailDTO board = boardService.findBoard(boardId);
+        if (!board.getMember_id().equals(memberId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("게시물을 수정할 권한이 없습니다.");
+        }
 
         try {
             boardService.updateBoard(boardId, title, content);
             log.info("게시판 수정 성공");
-            return "redirect:/board/detail/" + boardId;
+            return ResponseEntity.ok("게시판이 수정 되었습니다.");
+        } catch (NotFindBoardException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
         } catch (Exception e) {
-            model.addAttribute("error", "게시물 수정 중 오류 발생");
-            return "redirect:/board/boardEdit" + boardId; // 에러 발생 시 수정 페이지로 다시 이동
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류로 게시판 수정에 실패하였습니다.");
         }
     }
 
     // 게시물 삭제
     @GetMapping("/delete/{boardId}")
-    public String boardDelete(@PathVariable("boardId") Long boardId, HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("SS_MEMBER_ID");
-        if (userId == null) {
-            model.addAttribute("error", "로그인이 필요합니다.");
-            return "user/login";
-        }
+    public ResponseEntity<String> boardDelete(@PathVariable("boardId") Long boardId, HttpServletRequest request) {
+
+        Long memberId = (Long) request.getAttribute("memberId");
+        log.info("memberId : " + memberId);
 
         // 세션이 존재하는데, 해당 게시물의 작성자인지 확인하는 벨리데이션 로직이 필요함
         try {
             BoardDetailDTO board = boardService.findBoard(boardId);
             // 게시물의 작성자 ID와 세션 사용자 ID 비교
-            if (!board.getMember_id().equals(userId)) {
-                throw new NoPermissionException("삭제 권한이 없습니다.");
+            if (!board.getMember_id().equals(memberId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 권한이 없습니다.");
             }
             // 게시판 삭제
             boardService.deleteBoard(boardId);
-
-            // 게시판 전체 불러오기
-            List<BoardViewDTO> all = boardService.findAll();
-
-            // model 로 넘기면서 boardLsit 이동
-            model.addAttribute("boards", all);
-            log.info("게시물 삭제 성공");
-            return "board/boardList";  // 게시판 페이지로 이동
+            return ResponseEntity.ok("게시물이 삭제되었습니다.");
         } catch (NotFindBoardException e) {
-            model.addAttribute("error", e.getMessage());
             log.info("존재하지 않는 게시물");
-            return "search/findByReference";  // 기본 페이지로 리다이렉트
-        } catch (NoPermissionException e) {
-            model.addAttribute("error", e.getMessage());
-            log.info("삭제 권한 없음");
-            return "search/findByReference";  // 기본 페이지로 리다이렉트
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
         }
     }
 
