@@ -42,7 +42,7 @@
                     <div class="single-post">
                         <div class="blog_details">
                             <div class="blog-author">
-                                <form th:action="@{/board/edit/{boardId}(boardId=${boardDetail.board_id})}" th:method="post" onsubmit="return doSubmit(this);">
+                                <form>
                                     <div class="quote-wrapper">
                                         <div>
                                             <div class="row col-lg-12"><input class="single-input font-weight-bold" id="title" name="title" type="text" th:value="${boardDetail.board_title}"></div>
@@ -59,7 +59,7 @@
                                     </div>
                                     <hr>
                                     <div class="row">
-                                        <div><input class="genric-btn info-border radius mr-10 ml-20" type="submit" value="수정" /></div>
+                                        <div><input class="genric-btn info-border radius mr-10 ml-20" type="button" value="수정" onclick="request_board_update()"/></div>
                                     </div>
                                 </form>
                             </div>
@@ -71,18 +71,49 @@
     </section>
     <!-- Blog Area End -->
 </main>
-<script>
+<script th:inline="javascript">
 
-    function doSubmit() {
-        const title = document.getElementById('title').value;
-        const contents = document.getElementById('content').value;
+    // 실질적인 게시물 수정 요청을 한다.
+    function request_board_update() {
+        // html의 수정된 요소를 가져온다.
+        let title = document.getElementById("title").value;
+        let content = document.getElementById("content").value;
 
-        // 모든 필드가 채워졌는지 검사
-        if (title === '' || contents === '') {
-            Swal.fire('모든 필드를 채워주세요.');
-            return false;
-        }
-        return true;
+        // 형변환
+        const board_id = /*[[${boardDetail.board_id}]]*/ 'board_id';
+        let boardId = Number(board_id);
+
+        const data = {
+            title: title,
+            content: content
+        };
+
+        // 가져온 요소를 fetch 요청을 jwt 토큰과 함께 보낸다.
+        fetch(`/board/edit/${boardId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || 'Unknown error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data.message);
+                alert("게시판이 수정되었습니다.");
+                window.location.href = "/board/boardList";
+            })
+            .catch(error => {
+                alert(error);
+            });
+
+        // response entity 응답을 error => 표현한다.
     }
 
     window.onload = function() {

@@ -26,10 +26,6 @@ public class CommentController {
     @PostMapping("/write")
     public ResponseEntity<String> createComment(@RequestBody CommentDTO commentDTO) {
 
-        if (commentDTO.getMember_id() == null) {
-            return ResponseEntity.status(403).body("로그인이 필요합니다.");
-        }
-
         try {
             commentRepository.createComment(commentDTO);
             log.info("댓글등록 성공");

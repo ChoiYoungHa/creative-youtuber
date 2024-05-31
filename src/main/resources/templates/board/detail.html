@@ -43,7 +43,9 @@
                             <div class="blog-author">
                                 <div class="quote-wrapper">
                                     <div>
+                                        <div id="board_title_wrapper">
                                         <div><h1 class="font-weight-bold" id="board_title" th:text="${boardDetail.board_title}">제목들어가야함</h1></div>
+                                        </div>
                                         <div><h4 id="member_nickname" th:text="${boardDetail.member_nickname}">작성자 닉네임 </h4></div>
                                         <div class="row justify-content-end">
                                             <div><h5 class="mr-20" id="board_click" th:text="'조회수 : ' + ${boardDetail.click}">조회수 : </h5></div>
@@ -52,7 +54,9 @@
                                 </div>
                                 <hr>
                                 <div class="media align-items-center">
+                                    <div id="board_content_wrapper">
                                     <div id="board_content" th:text="${boardDetail.board_content}" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 16px">내용 드가야함</div>
+                                    </div>
                                 </div>
                                 <div class="comments-area">
                                     <h4 class="font-weight-bold">댓글목록</h4>
@@ -79,17 +83,15 @@
                                 </div>
                                 <div class="comments-area">
                                     <div class="comment-list">
-                                        <a class="genric-btn primary-border" id="board_update_button" onclick="update_validation(event)"
-                                           th:href="@{/board/boardEdit/{boardId}/{memberId} (boardId=${boardDetail.board_id})(memberId=${boardDetail.member_id})}">수정</a>
-                                        <a class="genric-btn primary-border"
-                                           th:href="@{/board/delete/{boardId} (boardId=${boardDetail.board_id})}">삭제</a>
+                                        <a class="genric-btn primary-border" onclick="move_update_page()">수정</a>
+                                        <a class="genric-btn primary-border" onclick="request_board_delete()">삭제</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    
+
                 </div>
             </div>
         </div>
@@ -113,39 +115,77 @@
         }
     };
 
-    async function update_validation(){
-        let board_update_button = document.getElementById("board_update_button");
-        // 작성자
-        let owner = /*[[${boardDetail.member_id}]]*/ 'member_id';
-        console.log(owner)
-        // 수정버튼 누른사람
-        let member_id = getMemberIdFromToken();
-        console.log(member_id);
-        if (!member_id) {
-            event.preventDefault();
-            Swal.fire("로그인이 필요한 기능입니다.");
+    // 게시물 업데이트 페이지 이동
+    function move_update_page(){
+        // 로그인이 안됐을 경우
+        let memberId = Number(getMemberIdFromToken());
+        const board_owner_id = /*[[${boardDetail.member_id}]]*/ 'member_id';
+        const board_id = /*[[${boardDetail.board_id}]]*/ 'board_id';
+
+        if (!memberId){
+            alert("로그인 해주세요.");
+            return false;
         }
-        if (owner === member_id) {
-            window.location.href = href;
-        }else{
-            Swal.fire("해당 게시물을 수정할 권한이 없습니다.")
+
+        // 게시물의 주인이 아닌 경우
+        if (memberId !== board_owner_id) {
+            alert("본인 게시물만 수정 가능합니다.")
+            return false;
         }
+
+        // 로그인이 됐고, 게시물의 주인인 경우 링크이동
+        window.location.href = "/board/boardEdit/" + board_id;
+
     }
 
+    // 게시물 삭제
+    function request_board_delete(){
+        // 형변환
+        const board_id = /*[[${boardDetail.board_id}]]*/ 'board_id';
+        let boardId = Number(board_id);
 
-
+        // 가져온 요소를 fetch 요청을 jwt 토큰과 함께 보낸다.
+        fetch(`/board/delete/${boardId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || 'Unknown error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data.message);
+                alert("게시판이 삭제되었습니다..");
+                window.location.href = "/board/boardList";
+            })
+            .catch(error => {
+                alert(error);
+            });
+    }
 
 
     /* 댓글 등록 요청 */
     async function submitComment() {
         const commentContent = document.getElementById('commentContent').value;
         const boardId = /*[[${boardDetail.board_id}]]*/ 'boardId';
-        const memberId = /*[[${session.SS_MEMBER_ID}]]*/ 'memberId';
+        const memberId = getMemberIdFromToken();
+
+        if (!memberId) {
+            alert("로그인 해주세요.");
+            return false;
+        }
 
         if (commentContent.trim() === '') {
             Swal.fire('댓글을 작성해주세요.');
             return;
         }
+
 
         try {
             const response = await fetch("/comment/write", {
@@ -165,6 +205,7 @@
             if (!response.ok) {
                 throw new Error(message || '댓글 등록에 실패했습니다.');
             }
+
             Swal.fire('성공', message, 'success');
             // 댓글 목록 새로고침
             await getComment();
@@ -178,7 +219,7 @@
     /* 댓글불러오기 */
     async function getComment() {
         const boardId = /*[[${boardDetail.board_id}]]*/ 'boardId';
-        const currentUserId = /*[[${session.SS_MEMBER_ID}]]*/ 'currentUserId';  // 세션에서 현재 사용자 ID 가져오기
+
         try {
             const response = await fetch(`/comment/getComments/${boardId}`, {
                 method: 'GET',
@@ -200,14 +241,12 @@
                                             <hr>
                                             <p class="comment" style="font-family: 'GmarketSansMedium', sans-serif; font-size: 16px">${comment.comment_content}</p>
                                             <h5>${comment.member_nickname}</h5>
+                                            <input type="hidden" value="${comment.member_id}">
                                             <div class="d-flex justify-content-between">`;
 
+                commentHtml += `<button onclick="editComment(this)" class="button button-contactForm btn_1 boxed-btn mt-3">수정</button>
+                                <button onclick="deleteComment(${comment.comment_id})" class="button button-contactForm btn_1 boxed-btn mt-3">삭제</button>`;
 
-                // 현재 로그인한 사용자와 댓글 작성자가 같을 경우에만 수정, 삭제 버튼 표시
-                if (currentUserId === comment.member_id) {
-                    commentHtml += `<button onclick="editComment(${comment.comment_id})" class="button button-contactForm btn_1 boxed-btn mt-3">수정</button>
-                                    <button onclick="deleteComment(${comment.comment_id})" class="button button-contactForm btn_1 boxed-btn mt-3">삭제</button>`;
-                }
 
                 commentHtml += `       </div>
                                         </div>
@@ -222,7 +261,23 @@
     }
 
     // 수정할 댓글 form으로 옮기기
-    async function editComment(commentId) {
+    async function editComment(commentElement) {
+
+        let handleCommentData = handleCommentClick(commentElement);
+        let commentId = handleCommentData.commentId;
+
+        // 현재 로그인된 아이디
+        let member_id = getMemberIdFromToken();
+        // 댓글 작성자
+        let memberId = handleCommentData.memberId;
+        console.log("현재 로그인된 아이디 번호 " + member_id + typeof member_id)
+        console.log("댓글작성자의 아이디 번호 " + memberId + typeof memberId)
+
+        if (member_id !== memberId){
+            alert("본인이 작성한 댓글만 수정 가능합니다.");
+            return false;
+        }
+
         try {
             const commentElement = document.getElementById(`comment-${commentId}`);
             const commentText = commentElement.querySelector('.comment').textContent;
@@ -278,7 +333,32 @@
         }
     }
 
-    async function deleteComment(commentId){
+    // 댓글삭제
+    async function deleteComment(commentId, commentElement){
+
+        let hiddenInput = commentElement.querySelector('input[type="hidden"]');
+        if (hiddenInput) {
+            const member_id = hiddenInput.value;
+            console.log('Clicked comment member_id:', member_id);
+
+            let getMemberId = getMemberIdFromToken();
+            let memberId = Number(getMemberId);
+
+            if (memberId !== member_id) {
+                alert("본인 댓글만 삭제 가능합니다.");
+                return false;
+            }
+        }
+
+        // 현재 로그인중인 사용자 ID 가져오고 이게 String이라 Number로 형변환
+        let getMemberId = getMemberIdFromToken();
+        let memberId = Number(getMemberId);
+
+        if (memberId !== member_id) {
+            alert("본인 댓글만 삭제 가능합니다.");
+            return false;
+        }
+
         try {
             const response = await fetch(`/comment/deleteComment/${commentId}`, {
                 method: 'POST',
@@ -296,6 +376,23 @@
         } catch (error) {
             console.error('Error:', error);
             Swal.fire(error.message, 'error');
+        }
+    }
+
+    function handleCommentClick(commentElement) {
+        // 클릭된 요소의 ID (comment-id 형식)
+        const commentId = commentElement.id.split('-')[1];
+
+        // 클릭된 요소의 자식 요소들 중 숨겨진 input 요소를 찾음
+        const hiddenInput = commentElement.querySelector('input[type="hidden"]');
+        if (hiddenInput) {
+            const memberId = hiddenInput.value;
+            console.log('Clicked comment comment_id:', commentId);
+            console.log('Clicked comment member_id:', memberId);
+            return {
+                commentId: commentId,
+                memberId: memberId
+            };
         }
     }
 

@@ -51,6 +51,14 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+
+        // 와일드카드가 있는 패턴과 URL이 일치하는지 확인하는 헬퍼 함수
+        function matchesPath(url, pattern) {
+            const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+            return regex.test(url);
+        }
+
+
         // 전역적으로 fetch 요청 가로채기
         const originalFetch = fetch;
         window.fetch = function (url, options = {}) {
@@ -68,10 +76,7 @@
             ];
 
             // 현재 요청 URL이 보호된 경로에 포함되는지 확인
-            const shouldIncludeToken = protectedPaths.some(path => url.startsWith(path));
-            console.log(shouldIncludeToken);
-            console.log(token)
-
+            const shouldIncludeToken = protectedPaths.some(path => matchesPath(url, path));
 
             if (shouldIncludeToken) {
                 if (!token) {
@@ -102,7 +107,7 @@
             if (!token) return null;
 
             const payload = decodeToken(token);
-            return payload.member_id;
+            return payload.memberId;
         }
 
 

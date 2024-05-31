@@ -1,6 +1,6 @@
 package creativeprj.creative.Controller;
 
-import creativeprj.creative.DTO.BoardEditRequestDTO;
+import creativeprj.creative.DTO.BoarRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jdk.jfr.Frequency;
@@ -98,34 +98,25 @@ public class BoardController {
         }
     }
 
-    // 게시판 수정 데이터 전달
+    // 게시판 수정 페이지 이동
     @GetMapping("/boardEdit/{boardId}")
-    @ResponseBody
-    public ResponseEntity<?> boardEdit(@PathVariable Long boardId, HttpServletRequest request, Model model) throws NoPermissionException {
-
-        Long memberId = (Long) request.getAttribute("memberId");
-        log.info("memberId : " + memberId);
-
-        // 해당 게시물의 작성자인지 확인하는 벨리데이션 로직이 필요함
-        try {
-            BoardDetailDTO board = boardService.findBoard(boardId);
-
-
-            // 게시물의 작성자 ID와 세션 사용자 ID 비교
-            if (!board.getMember_id().equals(memberId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 권한이 없습니다.");
-            }
-            return ResponseEntity.ok(board);
-        } catch (NotFindBoardException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
+    public String boardEdit(@PathVariable Long boardId, Model model) {
+        BoardDetailDTO board = boardService.findBoard(boardId);
+        if (board == null) {
+            model.addAttribute("error", "게시물을 찾을 수 없습니다.");
+            return "search/findByReference";
         }
+
+        model.addAttribute("boardDetail", board);
+        return "/board/boardEdit";
     }
+
 
 
     // 게시물 수정
     @PostMapping("/edit/{boardId}")
     public ResponseEntity<String> boardEditUpdate(@PathVariable("boardId") Long boardId,
-                                                  @RequestBody BoardEditRequestDTO bDTO,
+                                                  @RequestBody BoarRequestDTO bDTO,
                                                   HttpServletRequest request) {
 
         Long memberId = (Long) request.getAttribute("memberId");
@@ -135,17 +126,17 @@ public class BoardController {
 
         BoardDetailDTO board = boardService.findBoard(boardId);
         if (!board.getMember_id().equals(memberId)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("게시물을 수정할 권한이 없습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\": \"게시물이 수정할 권한이 없습니다.\"}");
         }
 
         try {
             boardService.updateBoard(boardId, title, content);
             log.info("게시판 수정 성공");
-            return ResponseEntity.ok("게시판이 수정 되었습니다.");
+            return ResponseEntity.ok("{\"message\": \"게시판이 수정 되었습니다.\"}");
         } catch (NotFindBoardException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"게시물이 존재하지 않습니다.\"}");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류로 게시판 수정에 실패하였습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"서버 오류로 수정에 실패했습니다.\"}");
         }
     }
 
@@ -161,14 +152,14 @@ public class BoardController {
             BoardDetailDTO board = boardService.findBoard(boardId);
             // 게시물의 작성자 ID와 세션 사용자 ID 비교
             if (!board.getMember_id().equals(memberId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 권한이 없습니다.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\": \"삭제 권한이 없습니다.\"}");
             }
             // 게시판 삭제
             boardService.deleteBoard(boardId);
-            return ResponseEntity.ok("게시물이 삭제되었습니다.");
+            return ResponseEntity.ok("{\"message\": \"게시물이 삭제 되었습니다..\"}");
         } catch (NotFindBoardException e) {
             log.info("존재하지 않는 게시물");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"게시물이 존재하지 않습니다.\"}");
         }
     }
 

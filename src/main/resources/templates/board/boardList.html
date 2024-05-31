@@ -82,12 +82,8 @@
                 </div>
             </div>
 
-            <div class="row justify-content-lg-end mt-20" style="display: none" id="board_write">
-                <div class="mr-30 btn">
-                    <a href="/board/createBoard" style="color: black">글쓰기</a>
-                </div>
-            </div>
-            <div class="row">
+            <div class="row justify-content-lg-end mt-20" style="display: flex" id="board_write">
+                <button class="mr-30 btn" onclick="request_board_create()" style="color: black">글쓰기</button>
             </div>
     </div>
     <!-- About-2 Area End -->
@@ -101,13 +97,18 @@
         }
     };
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const memberId = getMemberIdFromToken();
-        console.log("memberId : ", memberId);
-        if (memberId) {
-            document.getElementById('board_write').style.display = 'flex';
+    function request_board_create(){
+        // 비로그인 시 요청 막기
+        let memberId = getMemberIdFromToken();
+        if (!memberId) {
+            alert("로그인 후 이용해주세요.");
+            return false;
         }
-    });
+        // 그게 아니라면 링크이동
+        window.location.href = "/board/createBoard";
+    }
+
+
 </script>
 
 
