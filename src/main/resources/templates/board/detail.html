@@ -245,7 +245,7 @@
                                             <input type="hidden" value="${comment.member_id}">
                                             <div class="d-flex justify-content-space-between">`;
                 commentHtml += `<button onclick="editComment(this)" class="button button-contactForm btn_1 boxed-btn mt-3">수정</button>
-                                <button onclick="deleteComment(${comment.comment_id})" class="button button-contactForm btn_1 boxed-btn mt-3">삭제</button>`;
+                                <button onclick="deleteComment(this)" class="button button-contactForm btn_1 boxed-btn mt-3">삭제</button>`;
 
                 commentHtml += `       </div>
                                         </div>
@@ -303,6 +303,7 @@
         let commentId = document.getElementById('editComment').value;
         let commentContent = document.getElementById('commentContent').value;
 
+        console.log(commentId);
         console.log(commentContent);
 
 
@@ -312,7 +313,7 @@
         }
 
         try {
-            const response = await fetch(`/comment/editComment/${commentId}`, {
+            const response = await fetch(`/comment/edit/${commentId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -333,33 +334,26 @@
     }
 
     // 댓글삭제
-    async function deleteComment(commentId, commentElement){
+    async function deleteComment(commentElement){
 
-        let hiddenInput = commentElement.querySelector('input[type="hidden"]');
-        if (hiddenInput) {
-            const member_id = hiddenInput.value;
-            console.log('Clicked comment member_id:', member_id);
+        let handleCommentData = handleCommentClick(commentElement);
+        let commentId = handleCommentData.commentId;
 
-            let getMemberId = getMemberIdFromToken();
-            let memberId = Number(getMemberId);
+        // 현재 로그인된 아이디
+        let member_id = getMemberIdFromToken();
 
-            if (memberId !== member_id) {
-                alert("본인 댓글만 삭제 가능합니다.");
-                return false;
-            }
-        }
+        // 댓글 작성자
+        let memberId = handleCommentData.memberId;
+        console.log("현재 로그인된 아이디 번호 " + member_id + typeof member_id)
+        console.log("댓글작성자의 아이디 번호 " + memberId + typeof memberId)
 
-        // 현재 로그인중인 사용자 ID 가져오고 이게 String이라 Number로 형변환
-        let getMemberId = getMemberIdFromToken();
-        let memberId = Number(getMemberId);
-
-        if (memberId !== member_id) {
-            alert("본인 댓글만 삭제 가능합니다.");
+        if (member_id !== memberId){
+            alert("본인이 작성한 댓글만 삭제 가능합니다.");
             return false;
         }
 
         try {
-            const response = await fetch(`/comment/deleteComment/${commentId}`, {
+            const response = await fetch(`/comment/delete/${commentId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -380,10 +374,11 @@
 
     function handleCommentClick(commentElement) {
         // 클릭된 요소의 ID (comment-id 형식)
-        const commentId = commentElement.id.split('-')[1];
+        const commentContainer = commentElement.closest('.single-comment');
+        const commentId = commentContainer.id.split('-')[1];
 
         // 클릭된 요소의 자식 요소들 중 숨겨진 input 요소를 찾음
-        const hiddenInput = commentElement.querySelector('input[type="hidden"]');
+        const hiddenInput = commentContainer.querySelector('input[type="hidden"]');
         if (hiddenInput) {
             const memberId = hiddenInput.value;
             console.log('Clicked comment comment_id:', commentId);
