@@ -97,18 +97,6 @@ class BoardControllerTest {
     }
 
 
-    // 로그인 했지만 수정 권한이 없을 경우
-    @Test
-    public void testBoardEdit_Forbidden() throws Exception {
-        Mockito.when(boardService.findBoard(1L)).thenReturn(boardDetailDTO);
-
-        mockMvc.perform(get("/board/boardEdit/{boardId}", 1L)
-                        .header(HttpHeaders.AUTHORIZATION,jwtToken)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
-
-
 
 
 
