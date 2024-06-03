@@ -85,7 +85,6 @@ public class MemberController {
         log.info("password:" + password);
 
         // authenticationManager 에서 인증이 성공 여부 확인을 위해 사용
-        // UsernamePasswordAuthenticationToken 이 customAuthenticationProvider 로 전달
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
@@ -122,7 +121,8 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/signup")
-    public String joinMember(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+    public String joinMember(HttpServletRequest request, Model model,
+                             RedirectAttributes redirectAttributes) {
         String memberName = request.getParameter("member_name");
         String memberNick = request.getParameter("member_nick");
         String email = request.getParameter("email");
@@ -138,7 +138,8 @@ public class MemberController {
         try {
             memberService.join(member);
             log.info("회원가입 성공");
-            redirectAttributes.addFlashAttribute("msg", "회원가입이 성공적으로 완료되었습니다.");
+            redirectAttributes.addFlashAttribute("msg",
+                    "회원가입이 성공적으로 완료되었습니다.");
             return "redirect:login?success=true";
         } catch (IllegalStateException e) {
             log.info("회원가입 실패");

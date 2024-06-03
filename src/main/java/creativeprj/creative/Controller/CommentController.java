@@ -11,6 +11,7 @@ import creativeprj.creative.Repositrory.CommentRepository;
 import creativeprj.creative.Service.Impl.CommentService;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @Slf4j
@@ -39,14 +40,12 @@ public class CommentController {
     // 댓글 불러오기
     @GetMapping("getComments/{boardId}")
     public ResponseEntity<?> getComments(@PathVariable("boardId") Long boardId) {
-
         try {
             List<ViewCommentDTO> comments = commentService.getComments(boardId);
             return ResponseEntity.ok(comments);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("댓글 정보를 불러오는 중 오류가 발생했습니다: " + e.getMessage());
         }
-
     }
 
     // 댓글 수정요청

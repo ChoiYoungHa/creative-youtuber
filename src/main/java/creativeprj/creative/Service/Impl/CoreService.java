@@ -148,7 +148,8 @@ public class CoreService implements ICoreService {
         String json = new ObjectMapper().writeValueAsString(new RunRequest(assistantId));
         HttpEntity<String> requestEntity = new HttpEntity<>(json, headers);
         String url = "https://api.openai.com/v1/threads/" + threadId + "/runs";
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST,
+                requestEntity, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readTree(response.getBody());
@@ -158,7 +159,8 @@ public class CoreService implements ICoreService {
     }
 
     // GPT 답변이 완성될 때까지 기다림 (제한시간 30초, 2초마다 확인)
-    private boolean awaitRunCompletion(String threadId, String runId) throws InterruptedException, JsonProcessingException {
+    private boolean awaitRunCompletion(String threadId, String runId) throws
+            InterruptedException, JsonProcessingException {
         String status;
         long startTime = System.currentTimeMillis();
         long timeout = 30000; // 30 seconds timeout
@@ -166,8 +168,8 @@ public class CoreService implements ICoreService {
         // 최소 1번 실행보장
         do {
             if (System.currentTimeMillis() - startTime > timeout) {
-                log.info("Timeout exceeded while waiting for run to complete.");
-                return false; // Exit loop after timeout
+                log.info("응답시간이 너무 오래걸립니다.");
+                return false;
             }
 
             Thread.sleep(2000); // 2초마다 실행
@@ -338,33 +340,29 @@ public class CoreService implements ICoreService {
 
     // youtube 대본을 넣으면 레퍼런스 찾아주는 기능
     @Override
-    public List<YoutubeDTO> youtubeReference(String ask) throws JsonProcessingException, InterruptedException {
-        // openai rest 요청해서 대본 또는 요청사항을 맥락에 따라 핵심 키워드 1개 선정
+    public List<YoutubeDTO> youtubeReference(String ask) throws JsonProcessingException,
+            InterruptedException {
         // 어시스턴트 스레드 생성
         String threadId = createThread();
-        log.info("threadId : " + threadId);
+
         // 메시지가 생성된 스레드에 추가됐고, 메시지id를 받아옴
         String messageId = createMessage(threadId, ask);
-        log.info("messageId : " + messageId);
 
         // run thread를 실행시키고, 메시지 응답을 2초마다 기다림.
         // 응답이 완료되면 답변을 반환
         String result_response = checkRunCompletion(threadId, CORE_ASSISTANTS);
-        log.info("result_response: " + result_response);
 
+        // 어시스턴트가 반환한 키워드로 유튜브 검색
         String q = result_response.split(":")[1].trim();
         q = q.replaceAll("[^a-zA-Z0-9가-힣 ]", "");
-        log.info("q:" + q);
-
-        //키워드로 youtube api에 대본의 핵심 키워드로 유튜브 검색
         String result = searchVideos(q);
-        log.info(result);
 
         // 유튜브 검색결과를 DTO로 매핑
         List<YoutubeDTO> youtubeDTOS = parseYoutubeSearchResult(result);
 
         // 유튜브 id 추출
-        List<String> videoIds = youtubeDTOS.stream().map(YoutubeDTO::getVideoId).collect(Collectors.toList());
+        List<String> videoIds = youtubeDTOS.stream().map(YoutubeDTO::getVideoId)
+                .collect(Collectors.toList());
         // rest 재요청 후 각각의 동영상 조회수 알아내기
         Map<String, Integer> viewCounts = fetchVideoStatistics(videoIds);
 

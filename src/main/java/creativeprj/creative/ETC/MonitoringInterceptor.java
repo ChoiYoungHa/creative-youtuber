@@ -60,7 +60,8 @@ public class MonitoringInterceptor implements HandlerInterceptor {
                            Object handler, ModelAndView modelAndView) throws Exception {}
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) throws Exception {
         Object startTimeObj = request.getAttribute("startTime");
         if (startTimeObj == null) {
             return;
@@ -81,7 +82,8 @@ public class MonitoringInterceptor implements HandlerInterceptor {
         logMap.put("error_message", ex != null ? ex.getMessage() : null);
 
         // 로그 포맷 통일
-        String logMessage = String.format("[%s] %s executed in %dms", request.getMethod(), request.getRequestURI(), executeTime);
+        String logMessage = String.format("[%s] %s executed in %dms", request.getMethod(),
+                request.getRequestURI(), executeTime);
         sendLog(toJson(logMap));
         log.info(logMessage);
 

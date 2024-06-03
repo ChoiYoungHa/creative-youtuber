@@ -58,26 +58,27 @@ public class BoardController {
 
     // 게시물 등록
     @PostMapping("/write")
-    public String insertBoard(HttpServletRequest request) {
+    public String insertBoard(HttpServletRequest request, Model model) {
         String title = request.getParameter("title");
         String contents = request.getParameter("contents");
-        String member_id = request.getParameter("member_id");
-
-        long memberId = Long.parseLong(member_id);
+        Long memberId = (Long) request.getAttribute("member_id");
 
         BoardDTO bDTO = new BoardDTO();
         bDTO.setMember_id(memberId);
         bDTO.setBoard_name(title);
         bDTO.setBoard_content(contents);
 
+        String msg = "";
         try {
             boardService.createBoard(bDTO);
+            msg = "게시물이 등록 되었습니다.";
             log.info("게시물 등록 성공");
         } catch (Exception e) {
-            e.printStackTrace();
+            msg = "게시물 등록에 실패하였습니다.";
             log.info("게시물 등록 실패");
+        }finally {
+            model.addAttribute("msg", msg);
         }
-
         return "redirect:/board/boardList";
     }
 
